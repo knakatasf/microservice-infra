@@ -1,22 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: order-service
+  name: order-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: order
   template:
     metadata:
       labels:
-        app: order-service
+        app: order
     spec:
       containers:
-        - name: catalog-service
+        - name: order
           image: 793261838120.dkr.ecr.us-east-1.amazonaws.com/order-service:latest
           ports:
             - containerPort: 8080
+          env:
+            - name: CUSTOMER_SERVICE_HOST
+              value: "customer-service"
+            - name: CUSTOMER_SERVICE_PORT
+              value: "8080"
+            - name: CATALOG_SERVICE_HOST
+              value: "catalog-service"
+            - name: CATALOG_SERVICE_PORT
+              value: "8080"
 ---
 apiVersion: v1
 kind: Service
@@ -24,7 +33,7 @@ metadata:
   name: order-service
 spec:
   selector:
-    app: order-service
+    app: order
   ports:
     - protocol: TCP
       port: 8080

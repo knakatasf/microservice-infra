@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: customer-service
+  name: customer-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: customer-service
+      app: customer
   template:
     metadata:
       labels:
-        app: customer-service
+        app: customer
     spec:
       containers:
-        - name: customer-service
+        - name: customer
           image: 793261838120.dkr.ecr.us-east-1.amazonaws.com/customer-service:latest
           ports:
             - containerPort: 8080
@@ -24,7 +24,7 @@ metadata:
   name: customer-service
 spec:
   selector:
-    app: customer-service
+    app: customer
   ports:
     - protocol: TCP
       port: 8080

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalog-service
+  name: catalog-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catalog-service
+      app: catalog
   template:
     metadata:
       labels:
-        app: catalog-service
+        app: catalog
     spec:
       containers:
-        - name: catalog-service
+        - name: catalog
           image: 793261838120.dkr.ecr.us-east-1.amazonaws.com/catalog-service:latest
           ports:
             - containerPort: 8080
@@ -24,7 +24,7 @@ metadata:
   name: catalog-service
 spec:
   selector:
-    app: catalog-service
+    app: catalog
   ports:
     - protocol: TCP
       port: 8080
