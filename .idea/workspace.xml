@@ -5,12 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/qa/docker-compose.qa.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/qa/nginx/nginx.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/customer-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/customer-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/order-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/order-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/service.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,6 +44,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/qa/nginx" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -65,7 +67,9 @@
       <workItem from="1745039945402" duration="2847000" />
       <workItem from="1745085694730" duration="13148000" />
       <workItem from="1745123682913" duration="8756000" />
-      <workItem from="1745182226431" duration="9461000" />
+      <workItem from="1745182226431" duration="11581000" />
+      <workItem from="1745271294594" duration="631000" />
+      <workItem from="1745292944791" duration="5121000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commitment">
       <option name="closed" value="true" />
@@ -75,7 +79,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745043304208</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Configured k8s">
+      <option name="closed" value="true" />
+      <created>1745193769209</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1745193769210</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -83,6 +95,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commitment" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commitment" />
+    <MESSAGE value="Configured k8s" />
+    <option name="LAST_COMMIT_MESSAGE" value="Configured k8s" />
   </component>
 </project>
