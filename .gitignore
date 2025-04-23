@@ -36,3 +36,12 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+qa/qa-key
+qa/qa-key.pub
+
+qa/terraform/.terraform
+qa/terraform/.terraform.lock.hcl
+qa/terraform/.terraform.tfstate.lock.info
+qa/terraform/terraform.tfstate
+qa/terraform/terraform.tfstate.backup
