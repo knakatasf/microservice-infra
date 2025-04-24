@@ -23,7 +23,7 @@ jobs:
           cd source-repo
           for svc in frontend-service catalog-service customer-service order-service; do
             echo "🔨 Building $svc..."
-            docker build --no-cache --platform linux/amd64 -t $svc ./\$svc
+            docker build --no-cache --platform linux/amd64 -t $svc .
           done
 
       - name: Configure AWS credentials
