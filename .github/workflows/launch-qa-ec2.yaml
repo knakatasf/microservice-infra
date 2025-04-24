@@ -1,0 +1,15 @@
+name: Launch QA EC2
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [launch-qa-ec2]
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check the connection from the previous workflow
+        run: |
+          echo "Image_tag from upstream: ${{ github.event.client_payload.image_tag　}}"

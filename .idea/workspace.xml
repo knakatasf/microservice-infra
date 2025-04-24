@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/launch-qa-ec2.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.github/workflows/build-push-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build-push-all.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
@@ -75,7 +76,7 @@
       <workItem from="1745292944791" duration="5758000" />
       <workItem from="1745363443186" duration="949000" />
       <workItem from="1745369446622" duration="11110000" />
-      <workItem from="1745431534319" duration="15080000" />
+      <workItem from="1745431534319" duration="19723000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commitment">
       <option name="closed" value="true" />
@@ -125,7 +126,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745457878141</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745459755798</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1745459755798</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745459908025</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1745459908025</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
