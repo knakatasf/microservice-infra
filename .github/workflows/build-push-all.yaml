@@ -13,6 +13,8 @@ jobs:
           repository: knakatasf/microservice-source
           token: ${{ secrets.ACCESS_TOKEN }}
           path: source-repo
+          fetch-depth: 0       # fetch all commits
+          tags: true
 
       - name: Checkout infra-repo
         uses: actions/checkout@v3
@@ -36,6 +38,15 @@ jobs:
         run: |
           echo "Logging in to AWS ECR..."
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URL }}
+
+      - name: Read version
+        id: version
+        run: |
+          cd source-repo
+          # Get the most recent tag (e.g. "v1.0.0")
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          echo "VERSION=$LATEST_TAG" >> $GITHUB_ENV
+          echo "→ Releasing version $VERSION"
 
       - name: Build all images
         run: |
