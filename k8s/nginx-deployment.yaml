@@ -11,7 +11,8 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - http:
+    - host: green.claudio.works
+      http:
         paths:
           # FRONTEND: no rewrite, just prefix / → frontend
           - path: /

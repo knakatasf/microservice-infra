@@ -4,15 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/qa/packer/packer-ami.pkr.hcl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qa/terraform/output.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qa/terraform/qa-ec2.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qa/terraform/security-groups.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qa/terraform/variables.tf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/qa/terraform/vpc.tf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="Added packer and terraform">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/build-push-all.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/k8s/nginx-deployment-green.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/k8s/order-deployment-green.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,21 +35,21 @@
     <option name="showLibraryContents" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Terraform.terraform get in terraform.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Terraform.terraform get in terraform.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/qa/nginx" />
@@ -80,7 +77,8 @@
       <workItem from="1745271294594" duration="631000" />
       <workItem from="1745292944791" duration="5758000" />
       <workItem from="1745363443186" duration="949000" />
-      <workItem from="1745369446622" duration="6583000" />
+      <workItem from="1745369446622" duration="11110000" />
+      <workItem from="1745431534319" duration="12886000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commitment">
       <option name="closed" value="true" />
@@ -106,7 +104,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745299052676</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added packer and terraform">
+      <option name="closed" value="true" />
+      <created>1745376147298</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1745376147298</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -116,6 +122,7 @@
     <MESSAGE value="Initial commitment" />
     <MESSAGE value="Configured k8s" />
     <MESSAGE value="Added qa configuration" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added qa configuration" />
+    <MESSAGE value="Added packer and terraform" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added packer and terraform" />
   </component>
 </project>
