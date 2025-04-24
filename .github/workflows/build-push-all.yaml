@@ -59,7 +59,7 @@ jobs:
           set -e
           cd source-repo
           LATEST_VERSION=$(git describe --tags --abbrev=0)
-          IMAGE_TAG=$LATEST_VERSION-qa-(date + '%Y%m%d')
+          IMAGE_TAG=${LATEST_VERSION}-qa-(date + '%Y%m%d')
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           for svc in frontend-service catalog-service customer-service order-service; do
             IMAGE=${{ secrets.AWS_ECR_URL }}/$svc:$IMAGE_TAG
