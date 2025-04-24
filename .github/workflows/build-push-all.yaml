@@ -32,6 +32,11 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      - name: Login to AWS ECR
+        run: |
+          echo "Logging in to AWS ECR..."
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URL }}
+
       - name: Build all images
         run: |
           cd source-repo
@@ -74,7 +79,7 @@ jobs:
           SERVICES="frontend-service catalog-service customer-service order-service"
   
           for SERVICE in $SERVICES; do
-          IMAGE_TAG=793261838120.dkr.ecr.us-east-1.amazonaws.com/$SERVICE:$VERSION-qa-$(date +'%Y%m%d%H%M')
+          IMAGE_TAG=${{ secrets.AWS_ECR_URL }}/$SERVICE:$VERSION-qa-$(date +'%Y%m%d%H%M')
         
           echo "Tagging and pushing $SERVICE..."
           docker tag "$SERVICE" "$IMAGE_TAG"
