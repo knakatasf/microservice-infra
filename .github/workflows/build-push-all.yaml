@@ -73,7 +73,7 @@ jobs:
       - name: Trigger “promote-release” in infra repo
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           repository: knakatasf/microservice-infra
           event-type: launch-qa-ec2
           client-payload: |
