@@ -21,10 +21,25 @@ jobs:
         run: |
           set -e
           cd source-repo
-          for svc in frontend-service catalog-service customer-service order-service; do
-            echo "🔨 Building $svc..."
-            docker build --no-cache --platform linux/amd64 -t $svc .
-          done
+          echo "Building frontend-service..."
+          cd frontend-service
+          docker build --no-cache --platform linux/amd64 -t frontend-service .
+          cd ..
+          
+          echo "Building catalog-service..."
+          cd catalog-service
+          docker build --no-cache --platform linux/amd64 -t catalog-service .
+          cd ..
+          
+          echo "Building customer-service..."
+          cd customer-service
+          docker build --no-cache --platform linux/amd64 -t customer-service .
+          cd ..
+          
+          echo "Building order-service..."
+          cd order-service
+          docker build --no-cache --platform linux/amd64 -t order-service .
+          cd ..
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
