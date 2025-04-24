@@ -78,11 +78,6 @@ jobs:
           echo "Logging in to AWS ECR..."
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URL }}
 
-      - name: Read version
-        id: version
-        run: |
-          VERSION=$(cat source-repo/VERSION)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Push all images
         run: |
