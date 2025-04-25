@@ -106,10 +106,10 @@ jobs:
           cd k8s
           kubectl apply -f nginx-deployment.yaml
 
-      - name: Wait for Ingress to be established
+      - name: Wait for NGINX Ingress LB to be ready
         run: |
-          kubectl wait --for=condition=Established ingress/microservices-ingress \
-            --namespace default --timeout=180s
+          kubectl wait --for=condition=Ready service/ingress-nginx-controller \
+            --namespace ingress-nginx --timeout=300s
             
       - name: Get Ingress Controller LB DNS
         id: lb_dns
