@@ -75,6 +75,14 @@ jobs:
             --wait \
             --timeout=300s
 
+      - name: Deploy microservice workloads
+        run: |
+          cd k8s
+          kubectl apply -f catalog-deployment.yaml
+          kubectl apply -f customer-deployment.yaml
+          kubectl apply -f order-deployment.yaml
+          kubectl apply -f frontend-deployment.yaml
+
       - name: Apply rc tag images to k8s files
         run: |
           cd k8s
@@ -86,14 +94,6 @@ jobs:
           customer=${AWS_ECR_URL}/customer-service:${RC_TAG}
           kubectl set image deployment/order-deployment \
           order=${AWS_ECR_URL}/order-service:${RC_TAG}
-
-      - name: Deploy microservice workloads
-        run: |
-          cd k8s
-          kubectl apply -f catalog-deployment.yaml
-          kubectl apply -f customer-deployment.yaml
-          kubectl apply -f order-deployment.yaml
-          kubectl apply -f frontend-deployment.yaml
 
       - name: Wait for microservice rollouts
         run: |
