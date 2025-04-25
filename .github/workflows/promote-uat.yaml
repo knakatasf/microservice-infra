@@ -64,8 +64,8 @@ jobs:
 
       - name: Add ingress-nginx repo & Install NGINX Ingress Controller
         run: |
-          mkdir -p ~/.helm/repository
-          touch ~/.helm/repository/repositories.yaml
+          mkdir -p ~/.config/helm/repository
+          mkdir -p ~/.cache/helm/repository
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           helm repo update
           helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
