@@ -1,4 +1,4 @@
-name: Launch QA EC2
+name: Deploy QA EC2
 
 on:
   workflow_dispatch:
