@@ -39,4 +39,31 @@ spec:
                 name: order-service                # BLUE
                 port: { number: 8080 }
 
-    # ─────────── GREEN-TE
+    # ─────────── GREEN-TEST TRAFFIC ────────────
+    - host: green.example.com # green test host
+      http:
+        paths:
+          - path: /frontend(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: frontend-service              # BLUE
+                port: { number: 80 }
+          - path: /customer(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: customer-service              # BLUE
+                port: { number: 8080 }
+          - path: /catalog(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: catalog-service               # BLUE
+                port: { number: 8080 }
+          - path: /order(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service-green           # GREEN
+                port: { number: 8080 }
