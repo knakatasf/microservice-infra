@@ -1,4 +1,4 @@
-name: Destroy QA EC2
+name: Destroy QA
 on:
   workflow_dispatch:
 

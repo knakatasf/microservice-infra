@@ -1,0 +1,41 @@
+name: Promote to UAT
+
+on:
+  workflow_dispatch:
+    inputs:
+      qa_tag:
+        description: 'QA image tag to promote to rc tag'
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Compute UAT tag and promote
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+          
+          QA_TAG=${{ github.event.inputs.qa_tag }}
+          # swap -qa- → -rc- and update date to today
+          PREFIX=${QA_TAG%-qa-*}
+          TODAY=$(date +%Y%m%d)
+          RC_TAG="${PREFIX}-rc-${TODAY}"
+          echo "Promoting $QA_TAG → $UAT_TAG"
+
+          for svc in frontend-service catalog-service customer-service order-service; do
+            docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
+            docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
+                        $AWS_ECR_URL/${svc}:${RC_TAG}
+            docker push $AWS_ECR_URL/${svc}:${RC_TAG}
+          done
