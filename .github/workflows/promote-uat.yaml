@@ -54,7 +54,7 @@ jobs:
       - name: Update kubeconfig for EKS
         uses: aws-actions/amazon-eks-update-kubeconfig@v2
         with:
-          cluster-name: ${{ env.EKS_CLUSTER }}
+          cluster-name: $EKS_CLUSTER
           region: us-east-1
 
       - name: Set up Helm
