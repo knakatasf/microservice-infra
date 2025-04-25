@@ -96,11 +96,9 @@ jobs:
               aws ecr get-login-password --region us-east-1 \
                 | docker login --username AWS --password-stdin $AWS_ECR_URL
           
-              newgrp docker <<EOG
-                cd /home/ec2-user
-                docker-compose -f docker-compose.qa.yaml pull
-                docker-compose -f docker-compose.qa.yaml up -d
-              EOG
+              sg docker -c "cd /home/ec2-user && \
+                docker-compose -f docker-compose.qa.yaml pull && \
+                docker-compose -f docker-compose.qa.yaml up -d"
             EOF
 
       - name: Wait for 5 mins
