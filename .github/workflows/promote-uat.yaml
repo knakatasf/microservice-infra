@@ -52,7 +52,7 @@ jobs:
           version: 'latest'
 
       - name: Update kubeconfig for EKS
-        uses: aws-actions/amazon-eks-update-kubeconfig@v2
+        uses: aws-actions/amazon-eks-update-kubeconfig@v1
         with:
           cluster-name: $EKS_CLUSTER
           region: us-east-1
