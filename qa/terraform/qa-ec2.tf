@@ -2,21 +2,17 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_ami" "image" {
-  most_recent = true
-  owners = ["self"] # Looks for AMIs owned by your AWS account
-
-  filter {
-    name = "tag:Application"
-    values = ["amazon-linux-docker"] # Matches the tag set in Packer
-  }
+resource "aws_key_pair" "qa" {
+  key_name   = "qa-ec2-key"
+  public_key = var.public_key
 }
 
 resource "aws_instance" "qa-ec2" {
-  ami                    = data.aws_ami.image.id # AMI is baked with the public key
+  ami                    = var.ami_id # AMI is baked with the public key
   instance_type          = "t2.large"
   subnet_id              = module.vpc.public_subnets[0] # Bastion is in the public subnet
   vpc_security_group_ids = [aws_security_group.qa_ec2.id] # Security group for the bastion
+  key_name               = aws_key_pair.qa.key_name
 
   associate_public_ip_address = true
 

@@ -1,7 +1,7 @@
 variable "ami_id" {
-  description = "The AMI ID that EC2 instances will use. packer-ami.pkr.hcl will overwrite this value."
+  description = "Amazon Linus 2023"
   type        = string
-  default     = "ami-08b5b3a93ed654d19"
+  default     = "ami-0e449927258d45bc4"
 }
 
 variable "aws_region" {
@@ -43,7 +43,6 @@ variable "aws_private_subnet_cidr" {
 variable "public_key" {
   description = "Public key for SSH access"
   type        = string
-  default     = "qa-key"
 }
 
 variable "resource_tags" {

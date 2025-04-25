@@ -71,12 +71,12 @@ jobs:
             docker push "$FULL_IMAGE"
           done
 
-      - name: Trigger “promote-release” in infra repo
+      - name: Trigger deploy-qa.yaml
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           repository: knakatasf/microservice-infra
-          event-type: launch-qa-ec2
+          event-type: deploy-qa
           client-payload: |
             {
               "image_tag": "${{ env.IMAGE_TAG }}"
