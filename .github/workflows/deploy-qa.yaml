@@ -78,7 +78,7 @@ jobs:
               set -e
           
               sudo yum update -y
-              sudo amazon-linux-extras install -y docker
+              sudo dnf install -y docker
               sudo systemctl enable --now docker
               sudo usermod -aG docker ec2-user
         
@@ -96,9 +96,9 @@ jobs:
               docker-compose -f docker-compose.qa.yaml up -d
             EOF
 
-      - name: Wait for 10 mins
+      - name: Wait for 5 mins
         run: |
-          sleep(600)
+          sleep(300)
 
       - name: Terraform Destroy
         run: |
