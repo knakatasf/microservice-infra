@@ -95,7 +95,7 @@ jobs:
               docker-compose -f docker-compose.qa.yaml pull
               docker-compose -f docker-compose.qa.yaml up -d
             EOF
-      
+
       - name: Wait for 10 mins
         run: |
           sleep(600)

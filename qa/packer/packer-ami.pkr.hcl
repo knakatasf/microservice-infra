@@ -39,7 +39,7 @@ build {
   provisioner "shell" {
     inline = [
       "sudo yum update -y",
-      "sudo amazon-linux-extras install -y docker",
+      "sudo dnf install -y docker",
       "sudo systemctl enable --now docker",
       "sudo usermod -aG docker ec2-user",
 
