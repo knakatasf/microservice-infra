@@ -5,14 +5,11 @@ module "vpc" {
   cidr = var.vpc_cidr
   azs  = var.aws_azs
 
-  public_subnets = var.aws_public_subnet_cidr
-
-  private_subnets      = []
-  enable_private_subnet = false
-  enable_nat_gateway    = false
+  private_subnets = []
+  public_subnets  = var.aws_public_subnet_cidr  # Internet Gateway is created automatically by VPC
 
   enable_dns_hostnames = true
-
-  tags               = var.resource_tags
-  public_subnet_tags = var.resource_tags
+  
+  public_subnet_tags  = var.resource_tags
+  tags                = var.resource_tags
 }
