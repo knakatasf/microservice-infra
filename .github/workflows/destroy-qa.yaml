@@ -5,26 +5,26 @@ on:
 jobs:
   teardown:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          path: qa/terraform
+      - name: Check out repo
+        uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:            us-east-1
 
-      - name: Set up Terraform
+      - name: Set up Terraform CLI
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.7
 
-      - name: Terraform Destroy
+      - name: Terraform Destroy QA
+        working-directory: qa/terraform
         run: |
-          cd qa/terraform
           terraform init -input=false
           terraform destroy -auto-approve -input=false
