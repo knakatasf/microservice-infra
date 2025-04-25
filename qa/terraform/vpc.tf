@@ -3,7 +3,6 @@ module "vpc" {
 
   name = var.vpc_name
   cidr = var.vpc_cidr
-
   azs  = var.aws_azs
 
   private_subnets = var.aws_private_subnet_cidr

@@ -40,11 +40,11 @@ jobs:
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            us-east-1
 
-      - name: Build Packer AMI
-        run: |
-          cd qa/packer
-          packer init .
-          packer build packer-ami.pkr.hcl
+#      - name: Build Packer AMI
+#        run: |
+#          cd qa/packer
+#          packer init .
+#          packer build packer-ami.pkr.hcl
 
       - name: Terraform QA EC2
         run: |
