@@ -105,3 +105,10 @@ jobs:
           cd qa/terraform
           terraform init -input=false
           terraform destroy -auto-approve -input=false
+
+      - name: Cleanup QA infra on failure
+        if: ${{ failure() }}
+        run: |
+          echo "One of the previous steps failed – tearing down QA..."
+          cd qa/terraform
+          terraform destroy -auto-approve

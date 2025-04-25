@@ -20,7 +20,3 @@ resource "aws_instance" "qa-ec2" {
     Name = "QA-EC2"
   }
 }
-
-resource "aws_eip" "qa_ec2_eip" {
-  instance = aws_instance.qa-ec2.id
-}
