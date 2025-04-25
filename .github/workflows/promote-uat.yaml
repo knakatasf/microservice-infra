@@ -78,13 +78,13 @@ jobs:
       - name: Apply rc tag images to k8s files
         run: |
           cd k8s
-          kubectl set image deployment/frontend \
+          kubectl set image deployment/frontend-deployment \
           frontend=${AWS_ECR_URL}/frontend-service:${RC_TAG}
-          kubectl set image deployment/catalog \
+          kubectl set image deployment/catalog-deployment \
           catalog=${AWS_ECR_URL}/catalog-service:${RC_TAG}
-          kubectl set image deployment/customer \
+          kubectl set image deployment/customer-deployment \
           customer=${AWS_ECR_URL}/customer-service:${RC_TAG}
-          kubectl set image deployment/order \
+          kubectl set image deployment/order-deployment \
           order=${AWS_ECR_URL}/order-service:${RC_TAG}
 
       - name: Deploy microservice workloads
