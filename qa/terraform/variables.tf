@@ -37,6 +37,7 @@ variable "aws_public_subnet_cidr" {
 variable "public_key" {
   description = "Public key for SSH access"
   type        = string
+  default     = "qa-ec2-key"
 }
 
 variable "resource_tags" {
