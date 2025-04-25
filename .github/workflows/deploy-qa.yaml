@@ -94,11 +94,11 @@ jobs:
               export AWS_ECR_URL=${{ secrets.AWS_ECR_URL }}
           
               aws ecr get-login-password --region us-east-1 \
-                | docker login --username AWS --password-stdin $AWS_ECR_URL
+                | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
           
-              sg docker -c "cd /home/ec2-user && \
-                docker-compose -f docker-compose.qa.yaml pull && \
-                docker-compose -f docker-compose.qa.yaml up -d"
+              cd /home/ec2-user
+              sudo docker-compose -f docker-compose.qa.yaml pull
+              sudo docker-compose -f docker-compose.qa.yaml up -d
             EOF
 
       - name: Wait for 5 mins
