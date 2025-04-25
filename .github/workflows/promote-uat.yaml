@@ -31,11 +31,11 @@ jobs:
           PREFIX=${QA_TAG%-qa-*}
           TODAY=$(date +%Y%m%d)
           RC_TAG="${PREFIX}-rc-${TODAY}"
-          echo "Promoting $QA_TAG → $UAT_TAG"
+          echo "Promoting $QA_TAG → $RC_TAG"
 
           for svc in frontend-service catalog-service customer-service order-service; do
-            docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
-            docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
+            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
+            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
                         $AWS_ECR_URL/${svc}:${RC_TAG}
-            docker push $AWS_ECR_URL/${svc}:${RC_TAG}
+            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
           done
