@@ -9,7 +9,84 @@ jobs:
   promote:
     runs-on: ubuntu-latest
 
+    env:
+      #IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
+      IMAGE_TAG: v1.0.0-qa-20250425
+      AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+
     steps:
-      - name: Check the connection from the previous workflow
+      - uses: actions/checkout@v3
+
+      - name: Set up Packer
+        uses: hashicorp/setup-packer@v1
+        with:
+          packer_version: 1.9.2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Generate a key pair
         run: |
-          echo "Image_tag from upstream: ${{ github.event.client_payload.image_tag　}}"
+          cd qa
+          ssh-keygen -t rsa -b 4096 -C "qa-key" -f qa-key -N "" -q
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region:            us-east-1
+
+      - name: Build Packer AMI
+        run: |
+          cd qa/packer
+          packer build packer-ami.pkr.hcl
+
+      - name: Terraform QA EC2
+        run: |
+          cd qa/terraform
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
+
+      - name: Capture QA EC2 Public IP
+        run: |
+          cd qa/terraform
+          PUBLIC_IP=$(terraform output -raw qa_ec2_public_ip)
+          echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
+
+      - name: Render Docker Compose for QA
+        run: |
+          cd qa
+          envsubst \
+            < docker-compose.qa.yaml.tmpl \
+            > docker-compose.qa.yaml
+
+      - name: Transfer files to QA EC2
+        run: |
+          cd qa
+          scp -i qa-key \
+            -o StrictHostKeyChecking=no \
+            -r nginx \
+            docker-compose.qa.yaml \
+            ec2-user@${{ env.PUBLIC_IP }}:/home/ec2-user/
+
+      - name: Deploy on QA EC2
+        run: |
+          ssh -i qa/qa-key \
+            -o StrictHostKeyChecking=no \
+            ec2-user@${{ env.PUBLIC_IP }} << 'EOF'
+              set -e
+          
+              export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+              export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              export AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
+              aws ecr get-login-password --region us-east-1 \
+                | docker login --username AWS --password-stdin $AWS_ECR_URL
+          
+              cd /home/ec2-user
+              docker-compose -f docker-compose.qa.yaml pull
+              docker-compose -f docker-compose.qa.yaml up -d
+            EOF

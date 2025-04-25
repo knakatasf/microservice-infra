@@ -21,6 +21,7 @@ jobs:
         run: |
           set -e
           cd source-repo
+          
           echo "Building frontend-service..."
           cd frontend-service
           docker build --no-cache --platform linux/amd64 -t frontend-service .
