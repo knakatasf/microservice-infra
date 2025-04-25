@@ -6,7 +6,7 @@ on:
     types: [deploy-qa]
 
 jobs:
-  promote:
+  deploy-qa:
     runs-on: ubuntu-latest
 
     env:
@@ -95,3 +95,13 @@ jobs:
               docker-compose -f docker-compose.qa.yaml pull
               docker-compose -f docker-compose.qa.yaml up -d
             EOF
+      
+      - name: Wait for 10 mins
+        run: |
+          sleep(600)
+
+      - name: Terraform Destroy
+        run: |
+          cd qa/terraform
+          terraform init -input=false
+          terraform destroy -auto-approve -input=false
