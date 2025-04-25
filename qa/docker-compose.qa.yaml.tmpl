@@ -18,7 +18,7 @@ services:
       - backend
 
   customer:
-    image: ${AWS_ECR_URL}customer-service:${IMAGE_TAG}
+    image: ${AWS_ECR_URL}/customer-service:${IMAGE_TAG}
     container_name: customer
     expose:
       - "8080"

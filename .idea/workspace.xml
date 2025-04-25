@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-qa.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-qa.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qa/docker-compose.qa.yaml.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/qa/docker-compose.qa.yaml.tmpl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +76,7 @@
       <workItem from="1745363443186" duration="949000" />
       <workItem from="1745369446622" duration="11110000" />
       <workItem from="1745431534319" duration="25664000" />
-      <workItem from="1745544316096" duration="13332000" />
+      <workItem from="1745544316096" duration="14663000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commitment">
       <option name="closed" value="true" />
@@ -334,7 +334,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745557532390</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745557858139</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1745557858139</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745558669147</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1745558669147</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
