@@ -61,6 +61,10 @@ jobs:
             < docker-compose.qa.yaml.tmpl \
             > docker-compose.qa.yaml
 
+      - name: Wait for QA EC2 to be ready
+        run: |
+          sleep(15)
+
       - name: Transfer files to QA EC2
         run: |
           cd qa
