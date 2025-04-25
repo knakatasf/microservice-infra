@@ -97,7 +97,7 @@ jobs:
 
       - name: Wait for microservice rollouts
         run: |
-          for svc in catalog customer order frontend; do
+          for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
             kubectl rollout status deployment/$svc --namespace default --timeout=120s
           done
 
