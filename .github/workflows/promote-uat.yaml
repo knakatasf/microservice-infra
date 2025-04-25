@@ -12,8 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+      EKS_CLUSTER: eks-microservice
+      RC_TAG: v1.0.0-rc-20250425
 
     steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-east-1
@@ -21,21 +26,94 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
 
-      - name: Compute UAT tag and promote
-        run: |
-          aws ecr get-login-password --region us-east-1 \
-              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
-          
-          QA_TAG=${{ github.event.inputs.qa_tag }}
-          # swap -qa- → -rc- and update date to today
-          PREFIX=${QA_TAG%-qa-*}
-          TODAY=$(date +%Y%m%d)
-          RC_TAG="${PREFIX}-rc-${TODAY}"
-          echo "Promoting $QA_TAG → $RC_TAG"
+#      - name: Promote to rc tag
+#        run: |
+#          aws ecr get-login-password --region us-east-1 \
+#              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+#
+#          QA_TAG=${{ github.event.inputs.qa_tag }}
+#          # swap -qa- → -rc- and update date to today
+#          PREFIX=${QA_TAG%-qa-*}
+#          TODAY=$(date +%Y%m%d)
+#          RC_TAG="${PREFIX}-rc-${TODAY}"
+#          echo "Promoting $QA_TAG → $RC_TAG"
+#          echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
+#
+#          for svc in frontend-service catalog-service customer-service order-service; do
+#            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
+#            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
+#                        $AWS_ECR_URL/${svc}:${RC_TAG}
+#            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
+#          done
 
-          for svc in frontend-service catalog-service customer-service order-service; do
-            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
-            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
-                        $AWS_ECR_URL/${svc}:${RC_TAG}
-            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig for EKS
+        uses: aws-actions/amazon-eks-update-kubeconfig@v2
+        with:
+          cluster-name: ${{ env.EKS_CLUSTER }}
+          region: us-east-1
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: 'latest'
+
+      - name: Add ingress-nginx repo & Install NGINX Ingress Controller
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace \
+            --set controller.service.type=LoadBalancer \
+            --wait \
+            --timeout=300s
+
+      - name: Apply rc tag images to k8s files
+        run: |
+          cd k8s
+          kubectl set image deployment/frontend \
+          frontend=${AWS_ECR_URL}/frontend-service:${RC_TAG}
+          kubectl set image deployment/catalog \
+          catalog=${AWS_ECR_URL}/catalog-service:${RC_TAG}
+          kubectl set image deployment/customer \
+          customer=${AWS_ECR_URL}/customer-service:${RC_TAG}
+          kubectl set image deployment/order \
+          order=${AWS_ECR_URL}/order-service:${RC_TAG}
+
+      - name: Deploy microservice workloads
+        run: |
+          cd k8s
+          kubectl apply -f catalog-deployment.yaml
+          kubectl apply -f customer-deployment.yaml
+          kubectl apply -f order-deployment.yaml
+          kubectl apply -f frontend-deployment.yaml
+
+      - name: Wait for microservice rollouts
+        run: |
+          for svc in catalog customer order frontend; do
+            kubectl rollout status deployment/$svc --namespace default --timeout=120s
           done
+
+      - name: Deploy Ingress rules
+        run: |
+          cd k8s
+          kubectl apply -f microservices-ingress.yaml
+
+      - name: Wait for Ingress to be established
+        run: |
+          kubectl wait --for=condition=Established ingress/microservices \
+            --namespace default --timeout=60s
+            
+      - name: Get Ingress Controller LB DNS
+        id: lb_dns
+        run: |
+          DNS=$(kubectl -n ingress-nginx get svc ingress-nginx-controller \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "LoadBalancer DNS: $DNS"
+          # Export it as a step-output for later steps if you need it
+          echo "dns_name=$DNS" >> $GITHUB_OUTPUT
