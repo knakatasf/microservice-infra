@@ -43,6 +43,7 @@ jobs:
       - name: Build Packer AMI
         run: |
           cd qa/packer
+          packer init .
           packer build packer-ami.pkr.hcl
 
       - name: Terraform QA EC2

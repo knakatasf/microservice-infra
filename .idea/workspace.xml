@@ -5,14 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/qa/docker-compose.qa.yaml.tmpl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build-push-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build-push-all.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.github/workflows/launch-qa-ec2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/launch-qa-ec2.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/nginx-deployment-green.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/nginx-deployment-green.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qa/docker-compose.qa.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/qa/docker-compose1.qa.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qa/terraform/variables.tf" beforeDir="false" afterPath="$PROJECT_DIR$/qa/terraform/variables.tf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +76,7 @@
       <workItem from="1745363443186" duration="949000" />
       <workItem from="1745369446622" duration="11110000" />
       <workItem from="1745431534319" duration="25664000" />
-      <workItem from="1745544316096" duration="2993000" />
+      <workItem from="1745544316096" duration="3620000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commitment">
       <option name="closed" value="true" />
@@ -204,7 +198,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745467450661</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745547466331</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1745547466331</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
