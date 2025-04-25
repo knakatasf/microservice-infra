@@ -87,13 +87,13 @@ jobs:
         run: |
           cd k8s
           kubectl set image deployment/frontend-deployment \
-          frontend=${AWS_ECR_URL}/frontend-service:${RC_TAG}
+          frontend=${{ env.AWS_ECR_URL }}/frontend-service:${{ env.RC_TAG }}
           kubectl set image deployment/catalog-deployment \
-          catalog=${AWS_ECR_URL}/catalog-service:${RC_TAG}
+          catalog=${{ env.AWS_ECR_URL }}/catalog-service:${{ env.RC_TAG }}
           kubectl set image deployment/customer-deployment \
-          customer=${AWS_ECR_URL}/customer-service:${RC_TAG}
+          customer=${{ env.AWS_ECR_URL }}/customer-service:${{ env.RC_TAG }}
           kubectl set image deployment/order-deployment \
-          order=${AWS_ECR_URL}/order-service:${RC_TAG}
+          order=${{ env.AWS_ECR_URL }}/order-service:${{ env.RC_TAG }}
 
       - name: Wait for microservice rollouts
         run: |
@@ -106,27 +106,6 @@ jobs:
           cd k8s
           kubectl apply -f nginx-deployment.yaml
 
-      - name: Check infra
-        run: |
-          # 1. Inspect the controller Service’s status block
-          kubectl get svc ingress-nginx-controller \
-          --namespace ingress-nginx \
-          -o yaml
-          
-          # 2. Describe the Service to see any events or errors
-          kubectl describe svc ingress-nginx-controller \
-          --namespace ingress-nginx
-          
-          # 3. List the controller Pods & check their status
-          kubectl get pods \
-          --namespace ingress-nginx \
-          -l app.kubernetes.io/name=ingress-nginx \
-          -o wide
-          
-          # 4. Check for recent warning/error events in that namespace
-          kubectl get events \
-          --namespace ingress-nginx \
-          --sort-by='.lastTimestamp'
 
       - name: Wait for NGINX Ingress LB to be ready
         run: |
