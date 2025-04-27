@@ -135,8 +135,7 @@ jobs:
           echo "Zone ID is $ZONE_ID"
           
           ELB_ZONE_ID=$(aws elbv2 describe-load-balancers \
-            --names ingress-nginx-controller \
-            --query 'LoadBalancers[0].CanonicalHostedZoneId' \
+            --query "LoadBalancers[?DNSName=='${LB_DNS}'].CanonicalHostedZoneId" \
             --output text)
           echo "ELB HostedZoneId is $ELB_ZONE_ID"
           
