@@ -134,25 +134,17 @@ jobs:
             --output text | sed 's|/hostedzone/||')
           echo "Zone ID is $ZONE_ID"
           
-          ELB_ZONE_ID=$(aws elbv2 describe-load-balancers \
-            --query "LoadBalancers[?DNSName=='${LB_DNS}'].CanonicalHostedZoneId" \
-            --output text)
-          echo "ELB HostedZoneId is $ELB_ZONE_ID"
-          
           aws route53 change-resource-record-sets \
-            --hosted-zone-id $ZONE_ID \
+            --hosted-zone-id "$ZONE_ID" \
             --change-batch "{
-              \"Comment\": \"Automated UAT DNS record\",
+              \"Comment\": \"Automated UAT CNAME record\",
               \"Changes\": [{
                 \"Action\": \"UPSERT\",
                 \"ResourceRecordSet\": {
                   \"Name\": \"uat.${HOSTED_ZONE_NAME}\",
-                  \"Type\": \"A\",
-                  \"AliasTarget\": {
-                    \"HostedZoneId\": \"${ELB_ZONE_ID}\",
-                    \"DNSName\": \"${LB_DNS}\",
-                    \"EvaluateTargetHealth\": false
-                  }
+                  \"Type\": \"CNAME\",
+                  \"TTL\": 300,
+                  \"ResourceRecords\": [{\"Value\": \"${LB_DNS}\"}]
                 }
               }]
             }"
