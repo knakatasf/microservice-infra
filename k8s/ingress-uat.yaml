@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-ingress
+  namespace: uat
+  annotations:
+    # tell nginx to look at regex paths
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # strip the service‑prefix, forward everything after it
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    kubernetes.io/ingress.class: nginx
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: uat.claudio.works
+      http:
+        paths:
+          # FRONTEND: no rewrite, just prefix / → frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
+
+          # CATALOG: capture everything after the "/catalog/" prefix
+          - path: /catalog/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: catalog-service
+                port:
+                  number: 8080
+
+          # CUSTOMER
+          - path: /customer/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: customer-service
+                port:
+                  number: 8080
+
+          # ORDER
+          - path: /order/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-service
+                port:
+                  number: 8080

@@ -14,6 +14,7 @@ jobs:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
       RC_TAG: v1.0.0-rc-20250425
+      HOSTED_ZONE_NAME: claudio.works
 
     steps:
       - name: Check out repo
@@ -75,47 +76,86 @@ jobs:
             --wait \
             --timeout=300s
 
+      - name: Create namespaces
+        run: |
+          cd k8s
+          kubectl apply -f namespaces.yaml
+
       - name: Deploy microservice workloads
         run: |
           cd k8s
-          kubectl apply -f catalog-deployment.yaml
-          kubectl apply -f customer-deployment.yaml
-          kubectl apply -f order-deployment.yaml
-          kubectl apply -f frontend-deployment.yaml
+          kubectl apply -n uat -f catalog-deployment.yaml
+          kubectl apply -n uat -f customer-deployment.yaml
+          kubectl apply -n uat -f order-deployment.yaml
+          kubectl apply -n uat -f frontend-deployment.yaml
 
       - name: Apply rc tag images to k8s files
         run: |
           cd k8s
           kubectl set image deployment/frontend-deployment \
-          frontend=${{ env.AWS_ECR_URL }}/frontend-service:${{ env.RC_TAG }}
+          frontend=${{ env.AWS_ECR_URL }}/frontend-service:${{ env.RC_TAG }} \
+          -n uat
           kubectl set image deployment/catalog-deployment \
-          catalog=${{ env.AWS_ECR_URL }}/catalog-service:${{ env.RC_TAG }}
+          catalog=${{ env.AWS_ECR_URL }}/catalog-service:${{ env.RC_TAG }} \
+          -n uat
           kubectl set image deployment/customer-deployment \
-          customer=${{ env.AWS_ECR_URL }}/customer-service:${{ env.RC_TAG }}
+          customer=${{ env.AWS_ECR_URL }}/customer-service:${{ env.RC_TAG }} \
+          -n uat
           kubectl set image deployment/order-deployment \
-          order=${{ env.AWS_ECR_URL }}/order-service:${{ env.RC_TAG }}
+          order=${{ env.AWS_ECR_URL }}/order-service:${{ env.RC_TAG }} \
+          -n uat
 
       - name: Wait for microservice rollouts
         run: |
           for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
-            kubectl rollout status deployment/$svc --namespace default --timeout=120s
+            kubectl rollout status deployment/$svc --namespace uat --timeout=120s
           done
 
       - name: Deploy Ingress rules
         run: |
           cd k8s
-          kubectl apply -f nginx-deployment.yaml
-          
-      - name: Wait for NGINX Controller Pods
+          kubectl apply -f uat-ingress.yaml
+
+      - name: Wait for Ingress LB
         run: |
-          kubectl rollout status deployment/ingress-nginx-controller \
-            --namespace ingress-nginx --timeout=300s
+          kubectl wait --for=condition=available service/ingress-nginx-controller \
+            -n ingress-nginx --timeout=300s
             
-      - name: Get Ingress Controller LB DNS
-        id: lb_dns
+      - name: Publish uat.claudio.works → ELB in Route 53
         run: |
-          DNS=$(kubectl -n ingress-nginx get svc ingress-nginx-controller \
+          LB_DNS=$(kubectl -n ingress-nginx \
+            get svc ingress-nginx-controller \
             -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "LoadBalancer DNS: $DNS"
-          # Export it as a step-output for later steps if you need it
-          echo "dns_name=$DNS" >> $GITHUB_OUTPUT
+          echo "ELB DNS is $LB_DNS"
+          
+          ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+            --dns-name $HOSTED_ZONE_NAME \
+            --query 'HostedZones[0].Id' \
+            --output text | sed 's|/hostedzone/||')
+          echo "Zone ID is $ZONE_ID"
+          
+          ELB_ZONE_ID=$(aws elbv2 describe-load-balancers \
+            --names ingress-nginx-controller \
+            --query 'LoadBalancers[0].CanonicalHostedZoneId' \
+            --output text)
+          echo "ELB HostedZoneId is $ELB_ZONE_ID"
+          
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id $ZONE_ID \
+            --change-batch "{
+              \"Comment\": \"Automated UAT DNS record\",
+              \"Changes\": [{
+                \"Action\": \"UPSERT\",
+                \"ResourceRecordSet\": {
+                  \"Name\": \"uat.${HOSTED_ZONE_NAME}\",
+                  \"Type\": \"A\",
+                  \"AliasTarget\": {
+                    \"HostedZoneId\": \"${ELB_ZONE_ID}\",
+                    \"DNSName\": \"${LB_DNS}\",
+                    \"EvaluateTargetHealth\": false
+                  }
+                }
+              }]
+            }"
+          
+          echo "uat.${HOSTED_ZONE_NAME} → ${LB_DNS} (alias in Zone ${ZONE_ID})"
