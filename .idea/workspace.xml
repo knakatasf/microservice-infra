@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/promote-prod.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/k8s/ingress-prod.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,22 +33,22 @@
     <option name="showLibraryContents" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Terraform.terraform get in terraform.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/claudio/Desktop/School/USF_CS/686_DevOps/Final-project/microservice-infra/k8s",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Terraform.terraform get in terraform.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/claudio/Desktop/School/USF_CS/686_DevOps/Final-project/microservice-infra/k8s&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/k8s" />
@@ -82,23 +83,8 @@
       <workItem from="1745369446622" duration="11110000" />
       <workItem from="1745431534319" duration="25664000" />
       <workItem from="1745544316096" duration="32072000" />
-      <workItem from="1745714865301" duration="7936000" />
-    </task>
-    <task id="LOCAL-00017" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745547947258</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1745547947258</updated>
-    </task>
-    <task id="LOCAL-00018" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745548062394</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1745548062394</updated>
+      <workItem from="1745714865301" duration="8672000" />
+      <workItem from="1745786798944" duration="2084000" />
     </task>
     <task id="LOCAL-00019" summary="Added workflow">
       <option name="closed" value="true" />
@@ -476,7 +462,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745724757308</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745725025270</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1745725025270</updated>
+    </task>
+    <task id="LOCAL-00067" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745725202270</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1745725202270</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

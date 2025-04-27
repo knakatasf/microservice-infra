@@ -1,0 +1,153 @@
+name: Promote to Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      rc_tag:
+        description: 'RC image tag to promote to ga tag'
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+      EKS_CLUSTER: eks-microservice
+      HOSTED_ZONE_NAME: claudio.works
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Promote to ga tag
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+
+          RC_TAG=${{ github.event.inputs.rc_tag }}
+          PREFIX=${RC_TAG%-rc-*}
+          GA_TAG="${PREFIX}-ga"
+          echo "Promoting $RC_TAG → $GA_TAG"
+          echo "GA_TAG=$GA_TAG" >> $GITHUB_ENV
+
+          for svc in frontend-service catalog-service customer-service order-service; do
+            sudo docker pull $AWS_ECR_URL/${svc}:${RC_TAG}
+            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+                        $AWS_ECR_URL/${svc}:${GA_TAG}
+            sudo docker push $AWS_ECR_URL/${svc}:${GA_TAG}
+          
+            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+                        $AWS_ECR_URL/${svc}:latest
+            sudo docker push $AWS_ECR_URL/${svc}:latest
+          done
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name ${{ env.EKS_CLUSTER }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
+
+      - name: Add ingress-nginx repo & Install NGINX Ingress Controller
+        run: |
+          mkdir -p ~/.config/helm/repository
+          mkdir -p ~/.cache/helm/repository
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx \
+            --create-namespace \
+            --set controller.service.type=LoadBalancer \
+            --wait \
+            --timeout=300s
+
+      - name: Create namespaces
+        run: |
+          cd k8s
+          kubectl apply -f namespaces.yaml
+
+      - name: Deploy microservice workloads
+        run: |
+          cd k8s
+          kubectl apply -n prod -f catalog-deployment.yaml
+          kubectl apply -n prod -f customer-deployment.yaml
+          kubectl apply -n prod -f order-deployment.yaml
+          kubectl apply -n prod -f frontend-deployment.yaml
+
+      - name: Apply ga tag images to k8s files
+        run: |
+          cd k8s
+          kubectl set image deployment/frontend-deployment \
+          frontend=${{ env.AWS_ECR_URL }}/frontend-service:${{ env.GA_TAG }} \
+          -n prod
+          kubectl set image deployment/catalog-deployment \
+          catalog=${{ env.AWS_ECR_URL }}/catalog-service:${{ env.GA_TAG }} \
+          -n prod
+          kubectl set image deployment/customer-deployment \
+          customer=${{ env.AWS_ECR_URL }}/customer-service:${{ env.GA_TAG }} \
+          -n prod
+          kubectl set image deployment/order-deployment \
+          order=${{ env.AWS_ECR_URL }}/order-service:${{ env.GA_TAG }} \
+          -n prod
+
+      - name: Wait for microservice rollouts
+        run: |
+          for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
+            kubectl rollout status deployment/$svc --namespace prod --timeout=120s
+          done
+
+      - name: Deploy Ingress rules
+        run: |
+          cd k8s
+          kubectl apply -f ingress-prod.yaml
+
+      - name: Wait for NGINX Controller Pods
+        run: |
+          kubectl rollout status deployment/ingress-nginx-controller \
+            --namespace ingress-nginx --timeout=300s
+
+      - name: Publish prod.claudio.works → ELB in Route 53
+        run: |
+          LB_DNS=$(kubectl -n ingress-nginx \
+            get svc ingress-nginx-controller \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "ELB DNS is $LB_DNS"
+          
+          ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+            --dns-name $HOSTED_ZONE_NAME \
+            --query 'HostedZones[0].Id' \
+            --output text | sed 's|/hostedzone/||')
+          echo "Zone ID is $ZONE_ID"
+          
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id "$ZONE_ID" \
+            --change-batch "{
+              \"Comment\": \"Automated Prod CNAME record\",
+              \"Changes\": [{
+                \"Action\": \"UPSERT\",
+                \"ResourceRecordSet\": {
+                  \"Name\": \"prod.${HOSTED_ZONE_NAME}\",
+                  \"Type\": \"CNAME\",
+                  \"TTL\": 300,
+                  \"ResourceRecords\": [{\"Value\": \"${LB_DNS}\"}]
+                }
+              }]
+            }"
+          
+          echo "prod.${HOSTED_ZONE_NAME} → ${LB_DNS} (alias in Zone ${ZONE_ID})"
