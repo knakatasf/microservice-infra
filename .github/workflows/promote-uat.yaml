@@ -114,7 +114,7 @@ jobs:
       - name: Deploy Ingress rules
         run: |
           cd k8s
-          kubectl apply -f uat-ingress.yaml
+          kubectl apply -f ingress-uat.yaml
 
       - name: Wait for Ingress LB
         run: |
