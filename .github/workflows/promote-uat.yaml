@@ -116,10 +116,10 @@ jobs:
           cd k8s
           kubectl apply -f ingress-uat.yaml
 
-      - name: Wait for Ingress LB
+      - name: Wait for NGINX Controller Pods
         run: |
-          kubectl wait --for=condition=available service/ingress-nginx-controller \
-            -n ingress-nginx --timeout=300s
+          kubectl rollout status deployment/ingress-nginx-controller \
+            --namespace ingress-nginx --timeout=300s
             
       - name: Publish uat.claudio.works → ELB in Route 53
         run: |
