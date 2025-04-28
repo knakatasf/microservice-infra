@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   frontend:
-    image: ${AWS_ECR_URL}/frontend-service:${IMAGE_TAG}
+    image: ${AWS_ECR_URL}/frontend-service:${FRONTEND_TAG}
     container_name: frontend
     expose:
       - "80"
@@ -10,7 +10,7 @@ services:
       - backend
 
   catalog:
-    image: ${AWS_ECR_URL}/catalog-service:${IMAGE_TAG}
+    image: ${AWS_ECR_URL}/catalog-service:${CATALOG_TAG}
     container_name: catalog
     expose:
       - "8080"
@@ -18,7 +18,7 @@ services:
       - backend
 
   customer:
-    image: ${AWS_ECR_URL}/customer-service:${IMAGE_TAG}
+    image: ${AWS_ECR_URL}/customer-service:${CUSTOMER_TAG}
     container_name: customer
     expose:
       - "8080"
@@ -26,7 +26,7 @@ services:
       - backend
 
   order:
-    image: ${AWS_ECR_URL}/order-service:${IMAGE_TAG}
+    image: ${AWS_ECR_URL}/order-service:${ORDER_TAG}
     container_name: order
     expose:
       - "8080"
