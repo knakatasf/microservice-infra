@@ -54,7 +54,7 @@ jobs:
         id: compute_tag
         run: |
           DATE=$(date +%Y%m%d)
-          QA_TAG="v${{ github.event.inputs.version }}-qa-${DATE}"
+          QA_TAG="${{ github.event.inputs.version }}-qa-${DATE}"
           echo "QA_TAG=$QA_TAG" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
@@ -103,7 +103,7 @@ jobs:
       - name: Dispatch deploy-qa
         uses: peter-evans/repository-dispatch@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
           repository: knakatasf/microservice-infra
           event-type: deploy-qa
           client-payload: |

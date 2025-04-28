@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      #IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
-      IMAGE_TAG: v1.0.0-qa-20250425
+      IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
+      #IMAGE_TAG: v1.0.0-qa-20250425
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
 
     steps:
