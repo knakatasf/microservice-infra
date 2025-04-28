@@ -53,6 +53,12 @@ jobs:
           echo "${{ secrets.QA_PRIVATE_KEY }}" > ~/.ssh/qa-key.pem
           chmod 600 ~/.ssh/qa-key.pem
 
+      - name: Prepare Terraform vars
+        run: |
+          echo "TF_VAR_public_key<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.QA_PUBLIC_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Terraform QA EC2
         run: |
           cd qa/terraform
