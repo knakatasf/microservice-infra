@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'SemVer base (e.g. 1.1.0)'
+        description: "New Versioning e.g. v1.2.0"
         required: true
 
 jobs:
@@ -72,17 +72,42 @@ jobs:
 
       - name: Build & Push changed microservices
         run: |
+          # Initialize an empty array to collect changed services
+          CHANGED_LIST=()
+      
+          # Pair each detect flag with its service name
           CHANGED=(
-            ${{ needs.detect.outputs.frontend }}:frontend-service # This will be like true:frontend-service
-            ${{ needs.detect.outputs.catalog  }}:catalog-service  # This will be like false:catalog-service
+            ${{ needs.detect.outputs.frontend }}:frontend-service
+            ${{ needs.detect.outputs.catalog  }}:catalog-service
             ${{ needs.detect.outputs.customer }}:customer-service
             ${{ needs.detect.outputs.order    }}:order-service
           )
+      
           for entry in "${CHANGED[@]}"; do
-            IFS=':' read changed svc <<< "$entry" # changed = true/false, svc = frontend-service etc
+            IFS=':' read changed svc <<< "$entry"
             if [ "$changed" = "true" ]; then
               echo "🔨 Building $svc → $AWS_ECR_URL/$svc:$QA_TAG"
               docker build --platform linux/amd64 \
                 -t $AWS_ECR_URL/$svc:$QA_TAG "$svc"
               docker push $AWS_ECR_URL/$svc:$QA_TAG
-              CHANGED_LIST+=("\"
+              
+              # Append the service name (quoted) to the JSON list
+              CHANGED_LIST+=("\"$svc\"")
+            fi
+          done
+      
+          # Now CHANGED_LIST might look like: ("\"frontend-service\"" "\"order-service\"")
+          # Convert it into a JSON array string and export for downstream use
+          echo "CHANGED_SERVICES=[${CHANGED_LIST[*]}]" >> $GITHUB_ENV
+
+      - name: Dispatch deploy-qa
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: knakatasf/microservice-infra
+          event-type: deploy-qa
+          client-payload: |
+            {
+              "qa_tag":          "${{ env.QA_TAG }}",
+              "changed_services": ${{ env.CHANGED_SERVICES }}
+            }
