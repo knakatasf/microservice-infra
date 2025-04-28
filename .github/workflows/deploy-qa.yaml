@@ -7,7 +7,6 @@ on:
 jobs:
   deploy-qa:
     runs-on: ubuntu-latest
-
     env:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
 
@@ -18,30 +17,20 @@ jobs:
       - name: Parse dispatch payload
         id: parse
         run: |
-          # Grab the 'deployments' map and write it to the environment
-          DEPLOYMENTS='${{ toJson(github.event.client_payload.deployments) }}'
+          # read the raw JSON map, compact it to one line
+          DEPLOYMENTS=$(echo '${{ toJson(github.event.client_payload.deployments) }}' \
+                        | jq -c .)
           echo "DEPLOYMENTS=$DEPLOYMENTS" >> $GITHUB_ENV
-
-          # Read changed_services into an array (not strictly needed for lookup,
-          # but you can still use it if you like)
-          readarray -t CHANGED_SERVICES < <(
-            echo '${{ toJson(github.event.client_payload.changed_services) }}' \
-            | jq -r '.[]'
-          )
-
-          # For each service, if it's in DEPLOYMENTS, use that tag; else use 'latest'
+      
+          # now pick each tag (falling back to 'latest')
           for svc in frontend-service catalog-service customer-service order-service; do
-            if echo "$DEPLOYMENTS" | jq -e --arg s "$svc" 'has($s)' >/dev/null; then
-              tag=$(echo "$DEPLOYMENTS" | jq -r --arg s "$svc" '.[$s]')
-            else
-              tag=latest
-            fi
-
+            TAG=$(echo "$DEPLOYMENTS" \
+                  | jq -r --arg s "$svc" '.[$s] // "latest"')
             case "$svc" in
-              frontend-service) echo "FRONTEND_TAG=$tag" >> $GITHUB_ENV ;;
-              catalog-service)  echo "CATALOG_TAG=$tag"  >> $GITHUB_ENV ;;
-              customer-service) echo "CUSTOMER_TAG=$tag" >> $GITHUB_ENV ;;
-              order-service)    echo "ORDER_TAG=$tag"    >> $GITHUB_ENV ;;
+              frontend-service) echo "FRONTEND_TAG=$TAG" >> $GITHUB_ENV ;;
+              catalog-service)  echo "CATALOG_TAG=$TAG"  >> $GITHUB_ENV ;;
+              customer-service) echo "CUSTOMER_TAG=$TAG" >> $GITHUB_ENV ;;
+              order-service)    echo "ORDER_TAG=$TAG"    >> $GITHUB_ENV ;;
             esac
           done
 

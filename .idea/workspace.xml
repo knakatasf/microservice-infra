@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build-push.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build-push.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-qa.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-qa.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qa/docker-compose1.qa.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/qa/docker-compose.default.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -89,15 +84,7 @@
       <workItem from="1745714865301" duration="8672000" />
       <workItem from="1745786798944" duration="12993000" />
       <workItem from="1745869792043" duration="357000" />
-      <workItem from="1745878290891" duration="2512000" />
-    </task>
-    <task id="LOCAL-00025" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745554500514</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1745554500514</updated>
+      <workItem from="1745878290891" duration="3291000" />
     </task>
     <task id="LOCAL-00026" summary="Added workflow">
       <option name="closed" value="true" />
@@ -483,7 +470,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745813608838</updated>
     </task>
-    <option name="localTasksCounter" value="74" />
+    <task id="LOCAL-00074" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745881267119</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1745881267121</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
