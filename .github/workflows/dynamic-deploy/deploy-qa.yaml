@@ -1,7 +1,6 @@
 name: Deploy QA
 
 on:
-  workflow_dispatch:
   repository_dispatch:
     types: [deploy-qa]
 
@@ -10,12 +9,41 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      #IMAGE_TAG: ${{ github.event.client_payload.image_tag }}
-      IMAGE_TAG: v1.0.0-qa-20250425
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout infra repo
+        uses: actions/checkout@v3
+
+      - name: Parse dispatch payload
+        id: parse
+        run: |
+          # Read the QA tag
+          QA_TAG="${{ github.event.client_payload.qa_tag }}"
+          echo "QA_TAG=$QA_TAG" >> $GITHUB_ENV
+
+          # Read the JSON array of changed services
+          readarray -t CHANGED_SERVICES < <(
+            echo '${{ github.event.client_payload.changed_services }}' \
+            | jq -r '.[]'
+          )
+
+          # For each service, decide whether to use QA_TAG or 'latest'
+          for svc in frontend-service catalog-service customer-service order-service; do
+            tag=latest
+            for c in "${CHANGED_SERVICES[@]}"; do
+              if [ "$c" = "$svc" ]; then
+                tag="$QA_TAG"
+                break
+              fi
+            done
+            case "$svc" in
+              frontend-service) echo "FRONTEND_TAG=$tag" >> $GITHUB_ENV ;;
+              catalog-service)  echo "CATALOG_TAG=$tag"  >> $GITHUB_ENV ;;
+              customer-service) echo "CUSTOMER_TAG=$tag" >> $GITHUB_ENV ;;
+              order-service)    echo "ORDER_TAG=$tag"    >> $GITHUB_ENV ;;
+            esac
+          done
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -36,12 +64,6 @@ jobs:
           echo "${{ secrets.QA_PRIVATE_KEY }}" > ~/.ssh/qa-key.pem
           chmod 600 ~/.ssh/qa-key.pem
 
-      - name: Prepare Terraform vars
-        run: |
-          echo "TF_VAR_public_key<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.QA_PUBLIC_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: Terraform QA EC2
         run: |
           cd qa/terraform
@@ -57,13 +79,18 @@ jobs:
       - name: Render Docker Compose for QA
         run: |
           cd qa
-          envsubst \
+          # substitute AWS_ECR_URL plus the four *_TAG vars we exported
+          envsubst '\
+            ${AWS_ECR_URL} \
+            ${FRONTEND_TAG} \
+            ${CATALOG_TAG} \
+            ${CUSTOMER_TAG} \
+            ${ORDER_TAG}' \
             < docker-compose.qa.yaml.tmpl \
             > docker-compose.qa.yaml
 
       - name: Wait for QA EC2 to be ready
-        run: |
-          sleep 15
+        run: sleep 15
 
       - name: Transfer files to QA EC2
         run: |
@@ -80,22 +107,22 @@ jobs:
             -o StrictHostKeyChecking=no \
             ec2-user@${{ env.PUBLIC_IP }} << 'EOF'
             set -e
-        
             sudo yum update -y
             sudo yum install -y docker
             sudo service docker start
             sudo usermod -a -G docker ec2-user
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+              -o /usr/local/bin/docker-compose
             sudo chmod +x /usr/local/bin/docker-compose
-        
+
             export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             export AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
             export AWS_ECR_URL=${{ secrets.AWS_ECR_URL }}
-        
+
             aws ecr get-login-password --region us-east-1 \
               | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
-        
+
             cd /home/ec2-user
             sudo docker-compose -f docker-compose.qa.yaml pull
             sudo docker-compose -f docker-compose.qa.yaml up -d

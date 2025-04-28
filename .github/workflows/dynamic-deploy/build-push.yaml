@@ -1,0 +1,88 @@
+name: Build & Push QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SemVer base (e.g. 1.1.0)'
+        required: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend:  ${{ steps.filter.outputs.frontend }} # This will be true/false after filtering
+      catalog:   ${{ steps.filter.outputs.catalog }}
+      customer:  ${{ steps.filter.outputs.customer }}
+      order:     ${{ steps.filter.outputs.order }}
+    steps:
+      - name: Checkout infra repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Checkout microservice source
+        uses: actions/checkout@v3
+        with:
+          repository: knakatasf/microservice-source
+          token: ${{ secrets.ACCESS_TOKEN }}
+          path: source-repo
+          fetch-depth: 0
+
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'source-repo/frontend-service/**'
+            catalog:
+              - 'source-repo/catalog-service/**'
+            customer:
+              - 'source-repo/customer-service/**'
+            order:
+              - 'source-repo/order-service/**'   
+
+  build:
+    needs: detect
+    runs-on: ubuntu-latest
+    env:
+      AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Compute QA_TAG
+        id: compute_tag
+        run: |
+          DATE=$(date +%Y%m%d)
+          QA_TAG="v${{ github.event.inputs.version }}-qa-${DATE}"
+          echo "QA_TAG=$QA_TAG" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin $AWS_ECR_URL
+
+      - name: Build & Push changed microservices
+        run: |
+          CHANGED=(
+            ${{ needs.detect.outputs.frontend }}:frontend-service # This will be like true:frontend-service
+            ${{ needs.detect.outputs.catalog  }}:catalog-service  # This will be like false:catalog-service
+            ${{ needs.detect.outputs.customer }}:customer-service
+            ${{ needs.detect.outputs.order    }}:order-service
+          )
+          for entry in "${CHANGED[@]}"; do
+            IFS=':' read changed svc <<< "$entry" # changed = true/false, svc = frontend-service etc
+            if [ "$changed" = "true" ]; then
+              echo "🔨 Building $svc → $AWS_ECR_URL/$svc:$QA_TAG"
+              docker build --platform linux/amd64 \
+                -t $AWS_ECR_URL/$svc:$QA_TAG "$svc"
+              docker push $AWS_ECR_URL/$svc:$QA_TAG
+              CHANGED_LIST+=("\"

@@ -71,12 +71,12 @@ jobs:
             docker push "$FULL_IMAGE"
           done
 
-      - name: Trigger deploy-qa.yaml
+      - name: Trigger deploy-qa-all.yaml
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           repository: knakatasf/microservice-infra
-          event-type: deploy-qa
+          event-type: deploy-qa-all
           client-payload: |
             {
               "image_tag": "${{ env.IMAGE_TAG }}"
