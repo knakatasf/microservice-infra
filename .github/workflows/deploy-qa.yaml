@@ -18,25 +18,25 @@ jobs:
       - name: Parse dispatch payload
         id: parse
         run: |
-          # Read the QA tag
-          QA_TAG="${{ github.event.client_payload.qa_tag }}"
-          echo "QA_TAG=$QA_TAG" >> $GITHUB_ENV
+          # Grab the 'deployments' map and write it to the environment
+          DEPLOYMENTS='${{ toJson(github.event.client_payload.deployments) }}'
+          echo "DEPLOYMENTS=$DEPLOYMENTS" >> $GITHUB_ENV
 
-          # Read the JSON array of changed services
+          # Read changed_services into an array (not strictly needed for lookup,
+          # but you can still use it if you like)
           readarray -t CHANGED_SERVICES < <(
-            echo '${{ github.event.client_payload.changed_services }}' \
+            echo '${{ toJson(github.event.client_payload.changed_services) }}' \
             | jq -r '.[]'
           )
 
-          # For each service, decide whether to use QA_TAG or 'latest'
+          # For each service, if it's in DEPLOYMENTS, use that tag; else use 'latest'
           for svc in frontend-service catalog-service customer-service order-service; do
-            tag=latest
-            for c in "${CHANGED_SERVICES[@]}"; do
-              if [ "$c" = "$svc" ]; then
-                tag="$QA_TAG"
-                break
-              fi
-            done
+            if echo "$DEPLOYMENTS" | jq -e --arg s "$svc" 'has($s)' >/dev/null; then
+              tag=$(echo "$DEPLOYMENTS" | jq -r --arg s "$svc" '.[$s]')
+            else
+              tag=latest
+            fi
+
             case "$svc" in
               frontend-service) echo "FRONTEND_TAG=$tag" >> $GITHUB_ENV ;;
               catalog-service)  echo "CATALOG_TAG=$tag"  >> $GITHUB_ENV ;;
@@ -79,7 +79,6 @@ jobs:
       - name: Render Docker Compose for QA
         run: |
           cd qa
-          # substitute AWS_ECR_URL plus the four *_TAG vars we exported
           envsubst '\
             ${AWS_ECR_URL} \
             ${FRONTEND_TAG} \
@@ -106,27 +105,27 @@ jobs:
           ssh -i ~/.ssh/qa-key.pem \
             -o StrictHostKeyChecking=no \
             ec2-user@${{ env.PUBLIC_IP }} << 'EOF'
-            set -e
-            sudo yum update -y
-            sudo yum install -y docker
-            sudo service docker start
-            sudo usermod -a -G docker ec2-user
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
-              -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
+              set -e
+              sudo yum update -y
+              sudo yum install -y docker
+              sudo service docker start
+              sudo usermod -a -G docker ec2-user
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+                -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
 
-            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            export AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
-            export AWS_ECR_URL=${{ secrets.AWS_ECR_URL }}
+              export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+              export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              export AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }}
+              export AWS_ECR_URL=${{ secrets.AWS_ECR_URL }}
 
-            aws ecr get-login-password --region us-east-1 \
-              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+              aws ecr get-login-password --region us-east-1 \
+                | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
 
-            cd /home/ec2-user
-            sudo docker-compose -f docker-compose.qa.yaml pull
-            sudo docker-compose -f docker-compose.qa.yaml up -d
-          EOF
+              cd /home/ec2-user
+              sudo docker-compose -f docker-compose.qa.yaml pull
+              sudo docker-compose -f docker-compose.qa.yaml up -d
+            EOF
 
       - name: Cleanup QA infra on failure
         if: ${{ failure() }}
