@@ -1,4 +1,4 @@
-name: Build-n-Push All
+name: Build and Push All
 
 on:
   workflow_dispatch:

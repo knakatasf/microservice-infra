@@ -1,4 +1,4 @@
-name: Build & Push QA
+name: Build and Push
 
 on:
   workflow_dispatch:

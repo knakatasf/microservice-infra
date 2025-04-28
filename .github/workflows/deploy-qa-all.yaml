@@ -1,4 +1,4 @@
-name: Deploy QA
+name: Deploy QA All
 
 on:
   workflow_dispatch:
