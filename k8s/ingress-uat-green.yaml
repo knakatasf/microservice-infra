@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: microservices-ingress
+  namespace: uat
   annotations:
     # tell nginx to look at regex paths
     nginx.ingress.kubernetes.io/use-regex: "true"
@@ -11,14 +12,15 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - http:
+    - host: green-uat.claudio.works
+      http:
         paths:
           # FRONTEND: no rewrite, just prefix / → frontend
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend-service
+                name: frontend-service-${FRONTEND_TAG}
                 port:
                   number: 80
 
@@ -27,7 +29,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: catalog-service
+                name: catalog-service-${CATALOG_TAG}
                 port:
                   number: 8080
 
@@ -36,7 +38,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: customer-service
+                name: customer-service-${CUSTOMER_TAG}
                 port:
                   number: 8080
 
@@ -45,6 +47,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: order-service
+                name: order-service-${ORDER_TAG}
                 port:
                   number: 8080

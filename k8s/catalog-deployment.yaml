@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
         - name: catalog
-          image: 793261838120.dkr.ecr.us-east-1.amazonaws.com/catalog-service:latest
+          image: ${AWS_ECR_URL}/catalog-service:${CATALOG_TAG}
           ports:
             - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: catalog-service
+  name: catalog-service-${CATALOG_TAG}
 spec:
   selector:
     app: catalog

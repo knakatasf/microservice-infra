@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: order
-          image: 793261838120.dkr.ecr.us-east-1.amazonaws.com/order-service:latest
+          image: ${AWS_ECR_URL}/order-service:${ORDER_TAG}
           ports:
             - containerPort: 8080
           env:
@@ -30,7 +30,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: order-service
+  name: order-service-${ORDER_TAG}
 spec:
   selector:
     app: order

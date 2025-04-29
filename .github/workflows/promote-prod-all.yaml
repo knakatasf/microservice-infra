@@ -1,10 +1,10 @@
-name: Promote to UAT
+name: Promote to Prod
 
 on:
   workflow_dispatch:
     inputs:
-      qa_tag:
-        description: 'QA image tag to promote to rc tag'
+      rc_tag:
+        description: 'RC image tag to promote to ga tag'
         required: true
 
 jobs:
@@ -13,7 +13,6 @@ jobs:
     env:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
-      RC_TAG: v1.0.0-rc-20250425
       HOSTED_ZONE_NAME: claudio.works
 
     steps:
@@ -27,25 +26,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
 
-#      - name: Promote to rc tag
-#        run: |
-#          aws ecr get-login-password --region us-east-1 \
-#              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
-#
-#          QA_TAG=${{ github.event.inputs.qa_tag }}
-#          # swap -qa- → -rc- and update date to today
-#          PREFIX=${QA_TAG%-qa-*}
-#          TODAY=$(date +%Y%m%d)
-#          RC_TAG="${PREFIX}-rc-${TODAY}"
-#          echo "Promoting $QA_TAG → $RC_TAG"
-#          echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
-#
-#          for svc in frontend-service catalog-service customer-service order-service; do
-#            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
-#            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
-#                        $AWS_ECR_URL/${svc}:${RC_TAG}
-#            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
-#          done
+      - name: Promote to ga tag
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+
+          RC_TAG=${{ github.event.inputs.rc_tag }}
+          PREFIX=${RC_TAG%-rc-*}
+          GA_TAG="${PREFIX}-ga"
+          echo "Promoting $RC_TAG → $GA_TAG"
+          echo "GA_TAG=$GA_TAG" >> $GITHUB_ENV
+
+          for svc in frontend-service catalog-service customer-service order-service; do
+            sudo docker pull $AWS_ECR_URL/${svc}:${RC_TAG}
+            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+                        $AWS_ECR_URL/${svc}:${GA_TAG}
+            sudo docker push $AWS_ECR_URL/${svc}:${GA_TAG}
+          
+            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+                        $AWS_ECR_URL/${svc}:latest
+            sudo docker push $AWS_ECR_URL/${svc}:latest
+          done
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -82,46 +83,48 @@ jobs:
           kubectl apply -f namespaces.yaml
 
       - name: Deploy microservice workloads
-        run: |
-          cd k8s
-          kubectl apply -n uat -f catalog-deployment.yaml
-          kubectl apply -n uat -f customer-deployment.yaml
-          kubectl apply -n uat -f order-deployment.yaml
-          kubectl apply -n uat -f frontend-deployment.yaml
+        env:
+          AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+          FRONTEND_TAG: ${{ env.GA_TAG }}
+          CATALOG_TAG: ${{ env.GA_TAG }}
+          CUSTOMER_TAG: ${{ env.GA_TAG }}
+          ORDER_TAG: ${{ env.GA_TAG }}
+          run: |
+            cd k8s
 
-      - name: Apply rc tag images to k8s files
-        run: |
-          cd k8s
-          kubectl set image deployment/frontend-deployment \
-          frontend=${{ env.AWS_ECR_URL }}/frontend-service:${{ env.RC_TAG }} \
-          -n uat
-          kubectl set image deployment/catalog-deployment \
-          catalog=${{ env.AWS_ECR_URL }}/catalog-service:${{ env.RC_TAG }} \
-          -n uat
-          kubectl set image deployment/customer-deployment \
-          customer=${{ env.AWS_ECR_URL }}/customer-service:${{ env.RC_TAG }} \
-          -n uat
-          kubectl set image deployment/order-deployment \
-          order=${{ env.AWS_ECR_URL }}/order-service:${{ env.RC_TAG }} \
-          -n uat
+            envsubst '${AWS_ECR_URL} ${FRONTEND_TAG}' \
+              < frontend-deployment.yaml \
+              | kubectl apply -n prod -f -
+
+            envsubst '${AWS_ECR_URL} ${CATALOG_TAG}' \
+              < catalog-deployment.yaml \
+              | kubectl apply -n prod -f -
+
+            envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG}' \
+              < customer-deployment.yaml \
+              | kubectl apply -n prod -f -
+
+            envsubst '${AWS_ECR_URL} ${ORDER_TAG}' \
+              < order-deployment.yaml \
+              | kubectl apply -n prod -f -
 
       - name: Wait for microservice rollouts
         run: |
           for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
-            kubectl rollout status deployment/$svc --namespace uat --timeout=120s
+            kubectl rollout status deployment/$svc --namespace prod --timeout=120s
           done
 
       - name: Deploy Ingress rules
         run: |
           cd k8s
-          kubectl apply -f ingress-uat.yaml
+          kubectl apply -f ingress-prod.yaml
 
       - name: Wait for NGINX Controller Pods
         run: |
           kubectl rollout status deployment/ingress-nginx-controller \
             --namespace ingress-nginx --timeout=300s
-            
-      - name: Publish uat.claudio.works → ELB in Route 53
+
+      - name: Publish prod.claudio.works → ELB in Route 53
         run: |
           LB_DNS=$(kubectl -n ingress-nginx \
             get svc ingress-nginx-controller \
@@ -137,11 +140,11 @@ jobs:
           aws route53 change-resource-record-sets \
             --hosted-zone-id "$ZONE_ID" \
             --change-batch "{
-              \"Comment\": \"Automated UAT CNAME record\",
+              \"Comment\": \"Automated Prod CNAME record\",
               \"Changes\": [{
                 \"Action\": \"UPSERT\",
                 \"ResourceRecordSet\": {
-                  \"Name\": \"uat.${HOSTED_ZONE_NAME}\",
+                  \"Name\": \"prod.${HOSTED_ZONE_NAME}\",
                   \"Type\": \"CNAME\",
                   \"TTL\": 300,
                   \"ResourceRecords\": [{\"Value\": \"${LB_DNS}\"}]
@@ -149,4 +152,4 @@ jobs:
               }]
             }"
           
-          echo "uat.${HOSTED_ZONE_NAME} → ${LB_DNS} (alias in Zone ${ZONE_ID})"
+          echo "prod.${HOSTED_ZONE_NAME} → ${LB_DNS} (alias in Zone ${ZONE_ID})"
