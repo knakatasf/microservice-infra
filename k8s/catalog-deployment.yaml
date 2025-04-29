@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: catalog-deployment-${FRONTEND_TAG}
+  name: catalog-deployment-${CATALOG_SERV}
 spec:
   replicas: 1
   selector:

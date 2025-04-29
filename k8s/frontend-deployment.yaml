@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment-${FRONTEND_TAG}
+  name: frontend-deployment-${FRONTEND_SERV}
 spec:
   replicas: 1
   selector:
