@@ -5,17 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-qa-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-qa-all.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-prod-all.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-uat-all.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-uat-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-uat-all.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/customer-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/customer-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/ingress-uat.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/ingress-uat.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/nginx-deployment-green.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/nginx-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/ingress-uat-green.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/order-deployment-green.yaml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/order-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/order-deployment.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -93,23 +84,7 @@
       <workItem from="1745878290891" duration="4976000" />
       <workItem from="1745887227622" duration="976000" />
       <workItem from="1745888311809" duration="514000" />
-      <workItem from="1745888837229" duration="5266000" />
-    </task>
-    <task id="LOCAL-00029" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745555828809</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1745555828809</updated>
-    </task>
-    <task id="LOCAL-00030" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745556127746</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1745556127746</updated>
+      <workItem from="1745888837229" duration="7232000" />
     </task>
     <task id="LOCAL-00031" summary="Added workflow">
       <option name="closed" value="true" />
@@ -487,7 +462,23 @@
       <option name="project" value="LOCAL" />
       <updated>1745883142627</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745896165648</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1745896165648</updated>
+    </task>
+    <task id="LOCAL-00079" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745897592785</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1745897592785</updated>
+    </task>
+    <option name="localTasksCounter" value="80" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

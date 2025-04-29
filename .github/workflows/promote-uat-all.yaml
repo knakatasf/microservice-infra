@@ -108,7 +108,7 @@ jobs:
             < customer-deployment.yaml \
             | kubectl apply -n uat -f -
 
-          envsubst '${AWS_ECR_URL} ${ORDER_TAG} ${ORDER_SERV}' \
+          envsubst '${AWS_ECR_URL} ${ORDER_TAG} ${ORDER_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV}' \
             < order-deployment.yaml \
             | kubectl apply -n uat -f -
 

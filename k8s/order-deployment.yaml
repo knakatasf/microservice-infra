@@ -19,11 +19,11 @@ spec:
             - containerPort: 8080
           env:
             - name: CUSTOMER_SERVICE_HOST
-              value: "customer-service"
+              value: 'customer-service-${CUSTOMER_SERV}'
             - name: CUSTOMER_SERVICE_PORT
               value: "8080"
             - name: CATALOG_SERVICE_HOST
-              value: "catalog-service"
+              value: 'catalog-service-${CATALOG_SERV}'
             - name: CATALOG_SERVICE_PORT
               value: "8080"
 ---
