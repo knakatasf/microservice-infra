@@ -1,4 +1,4 @@
-name: Promote to UAT
+name: Promote to UAT All
 
 on:
   workflow_dispatch:
@@ -46,13 +46,18 @@ jobs:
 #                        $AWS_ECR_URL/${svc}:${RC_TAG}
 #            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
 #          done
-      
+
       - name: Set Image tag name
         run: |
-          echo "FRONTEND_TAG=$RC_TAG" >> $GITHUB_ENV
-          echo "CATALOG_TAG=$RC_TAG" >> $GITHUB_ENV
-          echo "CUSTOMER_TAG=$RC_TAG" >> $GITHUB_ENV
-          echo "ORDER_TAG=$RC_TAG" >> $GITHUB_ENV
+          # replace dots with hyphens once
+          SANITIZED_RC_TAG=${RC_TAG//./-}
+      
+          for svc in FRONTEND CATALOG CUSTOMER ORDER; do
+            # e.g. FRONTEND_TAG=v1.2.0-rc-20250425
+            echo "${svc}_TAG=${RC_TAG}" >> $GITHUB_ENV
+            # e.g. FRONTEND_SERV=v1-2-0-rc-20250425
+            echo "${svc}_SERV=${SANITIZED_RC_TAG}" >> $GITHUB_ENV
+          done
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
@@ -91,19 +96,19 @@ jobs:
       - name: Deploy microservice workloads
         run: |
           cd k8s
-          envsubst '${AWS_ECR_URL} ${FRONTEND_TAG}' \
+          envsubst '${AWS_ECR_URL} ${FRONTEND_TAG} ${FRONTEND_SERV}' \
             < frontend-deployment.yaml \
             | kubectl apply -n uat -f -
 
-          envsubst '${AWS_ECR_URL} ${CATALOG_TAG}' \
+          envsubst '${AWS_ECR_URL} ${CATALOG_TAG} ${CATALOG_SERV}' \
             < catalog-deployment.yaml \
             | kubectl apply -n uat -f -
 
-          envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG}' \
+          envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG} ${CUSTOMER_SERV}' \
             < customer-deployment.yaml \
             | kubectl apply -n uat -f -
 
-          envsubst '${AWS_ECR_URL} ${ORDER_TAG}' \
+          envsubst '${AWS_ECR_URL} ${ORDER_TAG} ${ORDER_SERV}' \
             < order-deployment.yaml \
             | kubectl apply -n uat -f -
 
@@ -116,7 +121,7 @@ jobs:
       - name: Deploy Ingress rules
         run: |
           cd k8s
-          envsubst '${FRONTEND_TAG} ${CATALOG_TAG} ${CUSTOMER_TAG} ${ORDER_TAG}' \
+          envsubst '${FRONTEND_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV} ${ORDER_SERV}' \
             < ingress-uat.yaml \
             | kubectl apply -f -
 

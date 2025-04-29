@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: customer-service-${CUSTOMER_TAG}
+  name: customer-service-${CUSTOMER_SERV}
 spec:
   selector:
     app: customer

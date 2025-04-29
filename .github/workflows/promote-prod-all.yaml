@@ -1,4 +1,4 @@
-name: Promote to Prod
+name: Promote to Prod All
 
 on:
   workflow_dispatch:
@@ -89,24 +89,24 @@ jobs:
           CATALOG_TAG: ${{ env.GA_TAG }}
           CUSTOMER_TAG: ${{ env.GA_TAG }}
           ORDER_TAG: ${{ env.GA_TAG }}
-          run: |
-            cd k8s
+        run: |
+          cd k8s
 
-            envsubst '${AWS_ECR_URL} ${FRONTEND_TAG}' \
-              < frontend-deployment.yaml \
-              | kubectl apply -n prod -f -
+          envsubst '${AWS_ECR_URL} ${FRONTEND_TAG}' \
+            < frontend-deployment.yaml \
+            | kubectl apply -n prod -f -
 
-            envsubst '${AWS_ECR_URL} ${CATALOG_TAG}' \
-              < catalog-deployment.yaml \
-              | kubectl apply -n prod -f -
+          envsubst '${AWS_ECR_URL} ${CATALOG_TAG}' \
+            < catalog-deployment.yaml \
+            | kubectl apply -n prod -f -
 
-            envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG}' \
-              < customer-deployment.yaml \
-              | kubectl apply -n prod -f -
+          envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG}' \
+            < customer-deployment.yaml \
+            | kubectl apply -n prod -f -
 
-            envsubst '${AWS_ECR_URL} ${ORDER_TAG}' \
-              < order-deployment.yaml \
-              | kubectl apply -n prod -f -
+          envsubst '${AWS_ECR_URL} ${ORDER_TAG}' \
+            < order-deployment.yaml \
+            | kubectl apply -n prod -f -
 
       - name: Wait for microservice rollouts
         run: |

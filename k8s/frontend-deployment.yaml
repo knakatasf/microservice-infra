@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service-${FRONTEND_TAG}
+  name: frontend-service-${FRONTEND_SERV}
 spec:
   selector:
     app: frontend
