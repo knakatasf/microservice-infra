@@ -114,8 +114,16 @@ jobs:
 
       - name: Wait for microservice rollouts
         run: |
-          for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
-            kubectl rollout status deployment/$svc --namespace uat --timeout=120s
+          for svc in \
+            catalog-deployment-${CATALOG_SERV} \
+            customer-deployment-${CUSTOMER_SERV} \
+            order-deployment-${ORDER_SERV} \
+            frontend-deployment-${FRONTEND_SERV}; do
+      
+            kubectl rollout status deployment/"$svc" \
+              --namespace uat \
+              --timeout=120s
+      
           done
 
       - name: Deploy Ingress rules
