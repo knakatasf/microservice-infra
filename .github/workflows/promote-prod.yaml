@@ -1,0 +1,210 @@
+name: Promote to Prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      updated_service:
+        description: "Which microservice to promote?"
+        required: true
+        type: choice
+        options:
+          - frontend
+          - catalog
+          - customer
+          - order
+      rc_tag:
+        description: "What RC tag to promote (e.g. 1.2.0-rc-20250502)?"
+        required: true
+
+jobs:
+  test-green:
+    runs-on: ubuntu-latest
+
+    # Declare the four suffix outputs, wired to the 'extract-suffixes' step
+    outputs:
+      FRONTEND_SERV: ${{ steps.extract-suffixes.outputs.FRONTEND_SERV }}
+      CATALOG_SERV: ${{ steps.extract-suffixes.outputs.CATALOG_SERV }}
+      CUSTOMER_SERV: ${{ steps.extract-suffixes.outputs.CUSTOMER_SERV }}
+      ORDER_SERV: ${{ steps.extract-suffixes.outputs.ORDER_SERV }}
+
+    env:
+      AWS_ECR_URL:    ${{ secrets.AWS_ECR_URL }}
+      EKS_CLUSTER:    eks-microservice
+      HOSTED_ZONE_NAME: claudio.works
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region:          us-east-1
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Promote RC → GA & latest
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+            | docker login --username AWS --password-stdin $AWS_ECR_URL
+
+          SHORT="${{ github.event.inputs.updated_service }}"
+          SERVICE="${SHORT}-service"
+          RC_TAG="${{ github.event.inputs.rc_tag }}"
+
+          PREFIX=${RC_TAG%-rc-*}            # strip off "-rc-…"
+          GA_TAG="${PREFIX}-ga"             # e.g. "1.2.0-ga"
+          echo "${SHORT^^}_TAG=$GA_TAG" >> $GITHUB_ENV
+          
+          SANITIZED_GA_TAG=${GA_TAG//./-}
+          echo "${SHORT^^}_SERV=$SANITIZED_GA_TAG" >> $GITHUB_ENV
+
+          # retag
+          docker pull $AWS_ECR_URL/$SERVICE:$RC_TAG
+          docker tag  $AWS_ECR_URL/$SERVICE:$RC_TAG $AWS_ECR_URL/$SERVICE:$GA_TAG
+          docker tag  $AWS_ECR_URL/$SERVICE:$RC_TAG $AWS_ECR_URL/$SERVICE:latest
+          docker push $AWS_ECR_URL/$SERVICE:$GA_TAG
+          docker push $AWS_ECR_URL/$SERVICE:latest
+
+      - name: Extract GA version suffixes into env
+        id: extract-suffixes
+        run: |
+          UPDATED="${{ github.event.inputs.updated_service }}"  # e.g. "frontend"
+          SERVICES=(frontend-service catalog-service customer-service order-service)
+
+          for svc in "${SERVICES[@]}"; do
+            # find the GA-tagged service name in prod
+            full=$(kubectl get svc -n prod \
+              -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' \
+              | grep "^${svc}-v.*-ga$")
+            version=${full#${svc}-}            # e.g. "v1-1-0-ga"
+
+            short=${svc%-service}              # e.g. "frontend"
+            UPPER=${short^^}                   # e.g. "FRONTEND"
+
+            if [ "$short" = "$UPDATED" ]; then
+              VAR_NAME="${UPPER}_BLUE_SERV"
+            else
+              VAR_NAME="${UPPER}_SERV"
+            fi
+
+            echo "${VAR_NAME}=${version}" >> $GITHUB_ENV
+            echo "${VAR_NAME}=${version}" >> $GITHUB_OUTPUT
+          done
+
+      - name: Set up kubectl & contexts
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      - run: |
+          aws eks update-kubeconfig --region us-east-1 --name $EKS_CLUSTER
+
+      - name: Deploy microservice workloads
+        run: |
+          cd k8s
+          case "${{ github.event.inputs.updated_service }}" in
+            frontend)
+              envsubst '${AWS_ECR_URL} ${FRONTEND_TAG} ${FRONTEND_SERV}' \
+                < frontend-deployment.yaml | kubectl apply -n prod -f -
+              ;;
+            catalog)
+              envsubst '${AWS_ECR_URL} ${CATALOG_TAG} ${CATALOG_SERV}' \
+                < catalog-deployment.yaml | kubectl apply -n prod -f -
+              ;;
+            customer)
+              envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG} ${CUSTOMER_SERV}' \
+                < customer-deployment.yaml | kubectl apply -n prod -f -
+              ;;
+            order)
+              envsubst '${AWS_ECR_URL} ${ORDER_TAG} ${ORDER_SERV}' \
+                < order-deployment.yaml | kubectl apply -n prod -f -
+              ;;
+          esac
+
+      - name: Wait for microservice rollouts
+        run: |
+          for svc in \
+            catalog-deployment-${CATALOG_SERV} \
+            customer-deployment-${CUSTOMER_SERV} \
+            order-deployment-${ORDER_SERV} \
+            frontend-deployment-${FRONTEND_SERV}; do
+
+            kubectl rollout status deployment/"$svc" \
+              --namespace prod \
+              --timeout=120s
+
+          done
+
+      - name: Deploy Ingress rules
+        run: |
+          cd k8s
+          envsubst '${FRONTEND_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV} ${ORDER_SERV}' \
+            < ingress-prod-green.yaml \
+            | kubectl apply -f -
+
+      - name: Wait for NGINX Controller Pods
+        run: |
+          kubectl rollout status deployment/ingress-nginx-controller \
+            --namespace ingress-nginx --timeout=300s
+
+      - name: Publish green.claudio.works → ELB in Route 53
+        run: |
+          LB_DNS=$(kubectl -n ingress-nginx \
+            get svc ingress-nginx-controller \
+            -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "ELB DNS is $LB_DNS"
+          
+          ZONE_ID=$(aws route53 list-hosted-zones-by-name \
+            --dns-name $HOSTED_ZONE_NAME \
+            --query 'HostedZones[0].Id' \
+            --output text | sed 's|/hostedzone/||')
+          echo "Zone ID is $ZONE_ID"
+          
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id "$ZONE_ID" \
+            --change-batch "{
+              \"Comment\": \"Automated UAT CNAME record\",
+              \"Changes\": [{
+                \"Action\": \"UPSERT\",
+                \"ResourceRecordSet\": {
+                  \"Name\": \"green.${HOSTED_ZONE_NAME}\",
+                  \"Type\": \"CNAME\",
+                  \"TTL\": 300,
+                  \"ResourceRecords\": [{\"Value\": \"${LB_DNS}\"}]
+                }
+              }]
+            }"
+          
+          echo "green.${HOSTED_ZONE_NAME} → ${LB_DNS} (alias in Zone ${ZONE_ID})"
+
+  publish-green:
+    runs-on: ubuntu-latest
+    needs: test-green
+    env:
+      AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
+      EKS_CLUSTER: eks-microservice
+      HOSTED_ZONE_NAME: claudio.works
+
+      # Pull in the four suffix outputs from test-green
+      FRONTEND_SERV: ${{ needs.test-green.outputs.FRONTEND_SERV }}
+      CATALOG_SERV: ${{ needs.test-green.outputs.CATALOG_SERV }}
+      CUSTOMER_SERV: ${{ needs.test-green.outputs.CUSTOMER_SERV }}
+      ORDER_SERV: ${{ needs.test-green.outputs.ORDER_SERV }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region us-east-1 --name ${{ env.EKS_CLUSTER }}
+
+      - name: Apply ingress-prod.yaml
+        run: |
+          cd k8s
+          envsubst '${FRONTEND_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV} ${ORDER_SERV}' \
+            < ingress-prod.yaml \
+            | kubectl apply -n prod -f -
