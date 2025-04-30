@@ -38,7 +38,7 @@ jobs:
       - name: Promote to rc tag
         run: |
           aws ecr get-login-password --region us-east-1 \
-              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+              | docker login --username AWS --password-stdin $AWS_ECR_URL
           
           # Inputs
           SHORT="${{ github.event.inputs.updated_service }}"   # e.g. "frontend"
