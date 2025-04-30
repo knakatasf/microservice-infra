@@ -43,6 +43,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
 
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-1 \
+            --name ${{ env.EKS_CLUSTER }}
+
       - name: Promote RC → GA & latest
         run: |
           aws ecr get-login-password --region us-east-1 \
@@ -55,7 +66,7 @@ jobs:
           PREFIX=${RC_TAG%-rc-*}            # strip off "-rc-…"
           GA_TAG="${PREFIX}-ga"             # e.g. "1.2.0-ga"
           echo "${SHORT^^}_TAG=$GA_TAG" >> $GITHUB_ENV
-          
+
           SANITIZED_GA_TAG=${GA_TAG//./-}
           echo "${SHORT^^}_SERV=$SANITIZED_GA_TAG" >> $GITHUB_ENV
 
