@@ -94,9 +94,10 @@ jobs:
             UPPER=${short^^}                   # e.g. "FRONTEND"
 
             if [ "$short" = "$UPDATED" ]; then
-              VAR_NAME="${UPPER}_BLUE_SERV"
+              echo "${UPPER}_SERV=${${UPPER}_SERV}" >> $GITHUB_OUTPUT
             else
-              VAR_NAME="${UPPER}_SERV"
+              echo "${UPPER}_SERV=${version}" >> $GITHUB_ENV
+              echo "${UPPER}_SERV=${version}" >> $GITHUB_OUTPUT
             fi
 
             echo "${VAR_NAME}=${version}" >> $GITHUB_ENV
