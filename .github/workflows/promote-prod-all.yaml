@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       rc_tag:
-        description: 'RC image tag to promote to ga tag'
+        description: 'RC image tag to promote to GA tag'
         required: true
 
 jobs:
