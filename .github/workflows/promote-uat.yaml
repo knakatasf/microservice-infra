@@ -23,7 +23,7 @@ jobs:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
       HOSTED_ZONE_NAME: claudio.works
-      RC_TAG: v1.0.0-rc-20250430
+      RC_TAG: v1.1.0-rc-20250430
 
     steps:
       - name: Check out repo
