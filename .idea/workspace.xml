@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/promote-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-prod-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-prod-all.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-prod.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/ingress-uat-green.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/ingress-prod-green.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,23 +84,7 @@
       <workItem from="1745887227622" duration="976000" />
       <workItem from="1745888311809" duration="514000" />
       <workItem from="1745888837229" duration="12068000" />
-      <workItem from="1745983824663" duration="15535000" />
-    </task>
-    <task id="LOCAL-00048" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745616800525</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1745616800525</updated>
-    </task>
-    <task id="LOCAL-00049" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745616931842</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1745616931842</updated>
+      <workItem from="1745983824663" duration="16523000" />
     </task>
     <task id="LOCAL-00050" summary="Added workflow">
       <option name="closed" value="true" />
@@ -480,7 +462,23 @@
       <option name="project" value="LOCAL" />
       <updated>1746044239332</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1746049373962</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1746049373962</updated>
+    </task>
+    <task id="LOCAL-00098" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1746049883207</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1746049883207</updated>
+    </task>
+    <option name="localTasksCounter" value="99" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
