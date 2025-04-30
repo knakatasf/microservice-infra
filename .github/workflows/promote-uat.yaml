@@ -4,10 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       updated_service:
-        description: "Which microservice to be updated, Frontend, Catalog, Customer, or Order?"
+        description: "Which microservice to promote?"
         required: true
+        type: choice
+        options:
+          - frontend
+          - catalog
+          - customer
+          - order
       qa_tag:
-        description: "The qa image tag to promote to rc tag"
+        description: "What QA tag of the microservice to promote?"
         required: true
 
 jobs:
@@ -16,7 +22,6 @@ jobs:
     env:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
-      RC_TAG: v1.0.0-rc-20250425
       HOSTED_ZONE_NAME: claudio.works
 
     steps:
@@ -34,32 +39,44 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 \
               | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+          
+          # Inputs
+          SHORT="${{ github.event.inputs.updated_service }}"   # e.g. "frontend"
+          SERVICE="${SHORT}-service"                           # e.g. "frontend-service"
+          QA_TAG="${{ github.event.inputs.qa_tag }}"           # e.g. "1.2.0-qa-20250501"
 
-          QA_TAG=${{ github.event.inputs.qa_tag }}
-          # swap -qa- → -rc- and update date to today
-          PREFIX=${QA_TAG%-qa-*}
-          TODAY=$(date +%Y%m%d)
-          RC_TAG="${PREFIX}-rc-${TODAY}"
-          echo "Promoting $QA_TAG → $RC_TAG"
+          # Build RC tag
+          PREFIX=${QA_TAG%-qa-*}                               # "1.2.0"
+          TODAY=$(date +%Y%m%d)                                # e.g. "20250502"
+          RC_TAG="${PREFIX}-rc-${TODAY}"                       # "1.2.0-rc-20250502"
           echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
 
-          for svc in frontend-service catalog-service customer-service order-service; do
-            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
-            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
-                        $AWS_ECR_URL/${svc}:${RC_TAG}
-            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
-          done
+          echo "Promoting only $SERVICE: $QA_TAG → $RC_TAG"
+          docker pull $AWS_ECR_URL/$SERVICE:$QA_TAG
+          docker tag  $AWS_ECR_URL/$SERVICE:$QA_TAG \
+                      $AWS_ECR_URL/$SERVICE:$RC_TAG
+          docker push $AWS_ECR_URL/$SERVICE:$RC_TAG
 
-      - name: Set Image tag name
+      - name: Set image tags for UAT deploy
         run: |
-          # replace dots with hyphens once
-          SANITIZED_RC_TAG=${RC_TAG//./-}
+          # Uppercase short name for looping
+          SHORT="${{ github.event.inputs.updated_service }}"
+          UPPER=$(echo "$SHORT" | tr '[:lower:]' '[:upper:]')
+          
+          # Prepare sanitized tags
+          SAN_RC=${RC_TAG//./-}      # e.g. "1-2-0-rc-20250502"
+          SAN_LATEST="latest"        # sanitized latest
           
           for svc in FRONTEND CATALOG CUSTOMER ORDER; do
-            # e.g. FRONTEND_TAG=v1.2.0-rc-20250425
-            echo "${svc}_TAG=${RC_TAG}" >> $GITHUB_ENV
-            # e.g. FRONTEND_SERV=v1-2-0-rc-20250425
-            echo "${svc}_SERV=${SANITIZED_RC_TAG}" >> $GITHUB_ENV
+            if [ "$svc" = "$UPPER" ]; then
+              TAG="$RC_TAG"
+              SERV="$SAN_RC"
+            else
+              TAG="latest"
+              SERV="$SAN_LATEST"
+            fi
+            echo "${svc}_TAG=$TAG" >> $GITHUB_ENV
+            echo "${svc}_SERV=$SERV" >> $GITHUB_ENV
           done
 
       - name: Set up kubectl
@@ -91,8 +108,18 @@ jobs:
             --wait \
             --timeout=300s
 
-      - name: Create namespaces
+      - name: Reset UAT namespace
         run: |
+          # delete if present (don’t fail if it wasn’t there)
+          kubectl delete namespace uat --ignore-not-found
+
+          # wait until it’s fully gone (or time out after 2m)
+          kubectl wait \
+            --for=delete namespace/uat \
+            --timeout=120s \
+            || echo "Timed out waiting for uat namespace to terminate"
+
+          # (Re)create it with your YAML manifest
           cd k8s
           kubectl apply -f namespaces.yaml
 
