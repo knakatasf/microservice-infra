@@ -92,16 +92,18 @@ jobs:
 
             short=${svc%-service}              # e.g. "frontend"
             UPPER=${short^^}                   # e.g. "FRONTEND"
+            VAR_NAME = ${UPPER}_SERV           # e.g. "FRONTEND_SERV"
 
             if [ "$short" = "$UPDATED" ]; then
-              echo "${UPPER}_SERV=${${UPPER}_SERV}" >> $GITHUB_OUTPUT
+              # use the sanitized GA tag you already wrote to GITHUB_ENV
+              VALUE="${!VAR_NAME}"
             else
-              echo "${UPPER}_SERV=${version}" >> $GITHUB_ENV
-              echo "${UPPER}_SERV=${version}" >> $GITHUB_OUTPUT
+              # for the others, use the freshly-extracted suffix
+              VALUE="$version"
             fi
-
-            echo "${VAR_NAME}=${version}" >> $GITHUB_ENV
-            echo "${VAR_NAME}=${version}" >> $GITHUB_OUTPUT
+            echo "${VAR_NAME}=${VALUE}" >> $GITHUB_ENV
+            echo "${VAR_NAME}=${VALUE}" >> $GITHUB_OUTPUT
+          
           done
 
       - name: Set up kubectl & contexts
