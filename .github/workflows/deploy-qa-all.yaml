@@ -34,6 +34,32 @@ jobs:
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region:            us-east-1
 
+      - name: Set IMAGE_TAG
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          else
+            TAG="${{ github.event.client_payload.image_tag }}"
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+
+      - name: Render Docker Compose for QA
+        run: |
+          cd qa
+          echo "FRONTEND_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "CATALOG_TAG=$IMAGE_TAG"  >> $GITHUB_ENV
+          echo "CUSTOMER_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "ORDER_TAG=$IMAGE_TAG"    >> $GITHUB_ENV
+          envsubst \
+            '$AWS_ECR_URL $FRONTEND_TAG $CATALOG_TAG $CUSTOMER_TAG $ORDER_TAG' \
+            < docker-compose.qa.yaml.tmpl \
+            > docker-compose.qa.yaml
+
+      - name: Debug rendered compose
+        run: |
+          cd qa
+          cat docker-compose.qa.yaml
+
       - name: Add SSH private key
         run: |
           mkdir -p ~/.ssh
@@ -57,27 +83,6 @@ jobs:
           cd qa/terraform
           PUBLIC_IP=$(terraform output -raw qa_ec2_public_ip)
           echo "PUBLIC_IP=$PUBLIC_IP" >> $GITHUB_ENV
-
-      - name: Set IMAGE_TAG
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.image_tag }}"
-          else
-            TAG="${{ github.event.client_payload.image_tag }}"
-          fi
-          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
-
-      - name: Render Docker Compose for QA
-        run: |
-          cd qa
-          echo "FRONTEND_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          echo "CATALOG_TAG=$IMAGE_TAG"  >> $GITHUB_ENV
-          echo "CUSTOMER_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          echo "ORDER_TAG=$IMAGE_TAG"    >> $GITHUB_ENV
-          envsubst \
-            '$AWS_ECR_URL $FRONTEND_TAG $CATALOG_TAG $CUSTOMER_TAG $ORDER_TAG' \
-            < docker-compose.qa.yaml.tmpl \
-            > docker-compose.qa.yaml
 
       - name: Wait for QA EC2 to be ready
         run: |
