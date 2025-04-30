@@ -14,6 +14,7 @@ jobs:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
       HOSTED_ZONE_NAME: claudio.works
+      GA_TAG: v1.0.0-ga-20250430
 
     steps:
       - name: Check out repo
@@ -26,26 +27,38 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
 
-      - name: Promote to ga tag
+#      - name: Promote to ga tag
+#        run: |
+#          aws ecr get-login-password --region us-east-1 \
+#              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
+#
+#          RC_TAG=${{ github.event.inputs.rc_tag }}
+#          PREFIX=${RC_TAG%-rc-*}
+#          GA_TAG="${PREFIX}-ga"
+#          echo "Promoting $RC_TAG → $GA_TAG"
+#          echo "GA_TAG=$GA_TAG" >> $GITHUB_ENV
+#
+#          for svc in frontend-service catalog-service customer-service order-service; do
+#            sudo docker pull $AWS_ECR_URL/${svc}:${RC_TAG}
+#            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+#                        $AWS_ECR_URL/${svc}:${GA_TAG}
+#            sudo docker push $AWS_ECR_URL/${svc}:${GA_TAG}
+#
+#            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
+#                        $AWS_ECR_URL/${svc}:latest
+#            sudo docker push $AWS_ECR_URL/${svc}:latest
+#          done
+
+      - name: Set Image tag name
         run: |
-          aws ecr get-login-password --region us-east-1 \
-              | sudo docker login --username AWS --password-stdin $AWS_ECR_URL
-
-          RC_TAG=${{ github.event.inputs.rc_tag }}
-          PREFIX=${RC_TAG%-rc-*}
-          GA_TAG="${PREFIX}-ga"
-          echo "Promoting $RC_TAG → $GA_TAG"
-          echo "GA_TAG=$GA_TAG" >> $GITHUB_ENV
-
-          for svc in frontend-service catalog-service customer-service order-service; do
-            sudo docker pull $AWS_ECR_URL/${svc}:${RC_TAG}
-            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
-                        $AWS_ECR_URL/${svc}:${GA_TAG}
-            sudo docker push $AWS_ECR_URL/${svc}:${GA_TAG}
+          # replace dots with hyphens once
+          SANITIZED_GA_TAG=${GA_TAG//./-}
           
-            sudo docker tag  $AWS_ECR_URL/${svc}:${RC_TAG} \
-                        $AWS_ECR_URL/${svc}:latest
-            sudo docker push $AWS_ECR_URL/${svc}:latest
+          for svc in FRONTEND CATALOG CUSTOMER ORDER; do
+            # e.g. FRONTEND_TAG=v1.2.0-rc-20250425
+            echo "${svc}_TAG=${GA_TAG}" >> $GITHUB_ENV
+            # e.g. FRONTEND_SERV=v1-2-0-rc-20250425
+            echo "${svc}_SERV=${SANITIZED_GA_TAG}" >> $GITHUB_ENV
           done
 
       - name: Set up kubectl
@@ -83,41 +96,44 @@ jobs:
           kubectl apply -f namespaces.yaml
 
       - name: Deploy microservice workloads
-        env:
-          AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
-          FRONTEND_TAG: ${{ env.GA_TAG }}
-          CATALOG_TAG: ${{ env.GA_TAG }}
-          CUSTOMER_TAG: ${{ env.GA_TAG }}
-          ORDER_TAG: ${{ env.GA_TAG }}
         run: |
           cd k8s
-
-          envsubst '${AWS_ECR_URL} ${FRONTEND_TAG}' \
+          envsubst '${AWS_ECR_URL} ${FRONTEND_TAG} ${FRONTEND_SERV}' \
             < frontend-deployment.yaml \
             | kubectl apply -n prod -f -
 
-          envsubst '${AWS_ECR_URL} ${CATALOG_TAG}' \
+          envsubst '${AWS_ECR_URL} ${CATALOG_TAG} ${CATALOG_SERV}' \
             < catalog-deployment.yaml \
             | kubectl apply -n prod -f -
 
-          envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG}' \
+          envsubst '${AWS_ECR_URL} ${CUSTOMER_TAG} ${CUSTOMER_SERV}' \
             < customer-deployment.yaml \
             | kubectl apply -n prod -f -
 
-          envsubst '${AWS_ECR_URL} ${ORDER_TAG}' \
+          envsubst '${AWS_ECR_URL} ${ORDER_TAG} ${ORDER_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV}' \
             < order-deployment.yaml \
             | kubectl apply -n prod -f -
 
       - name: Wait for microservice rollouts
         run: |
-          for svc in catalog-deployment customer-deployment order-deployment frontend-deployment; do
-            kubectl rollout status deployment/$svc --namespace prod --timeout=120s
+          for svc in \
+            catalog-deployment-${CATALOG_SERV} \
+            customer-deployment-${CUSTOMER_SERV} \
+            order-deployment-${ORDER_SERV} \
+            frontend-deployment-${FRONTEND_SERV}; do
+
+            kubectl rollout status deployment/"$svc" \
+              --namespace uat \
+              --timeout=120s
+
           done
 
       - name: Deploy Ingress rules
         run: |
           cd k8s
-          kubectl apply -f ingress-prod.yaml
+          envsubst '${FRONTEND_SERV} ${CATALOG_SERV} ${CUSTOMER_SERV} ${ORDER_SERV}' \
+            < ingress-prod.yaml \
+            | kubectl apply -f -
 
       - name: Wait for NGINX Controller Pods
         run: |
