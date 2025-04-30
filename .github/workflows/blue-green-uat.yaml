@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       updated_service:
-        description: "Which microservice to be updated, Frontend, Catalog, Customer, or Order?"
+        description: "Microservice to be promoted: frontend, catalog, customer, order"
         required: true
       qa_tag:
-        description: "The qa image tag to promote to rc tag"
+        description: "QA tag to promote to RC tag (e.g. v1.0.0-qa-20250425)"
         required: true
 
 jobs:
@@ -16,7 +16,6 @@ jobs:
     env:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
-      RC_TAG: v1.0.0-rc-20250425
       HOSTED_ZONE_NAME: claudio.works
 
     steps:
@@ -42,18 +41,21 @@ jobs:
           RC_TAG="${PREFIX}-rc-${TODAY}"
           echo "Promoting $QA_TAG → $RC_TAG"
           echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
+          
+          UPDATED_SERVICE=${{ github.event.inputs.updated_service }}
 
-          for svc in frontend-service catalog-service customer-service order-service; do
-            sudo docker pull $AWS_ECR_URL/${svc}:${QA_TAG}
-            sudo docker tag  $AWS_ECR_URL/${svc}:${QA_TAG} \
-                        $AWS_ECR_URL/${svc}:${RC_TAG}
-            sudo docker push $AWS_ECR_URL/${svc}:${RC_TAG}
-          done
+          sudo docker pull $AWS_ECR_URL/${UPDATED_SERVICE}-service:${QA_TAG}
+          sudo docker tag  $AWS_ECR_URL/${UPDATED_SERVICE}-service:${QA_TAG} \
+                           $AWS_ECR_URL/${UPDATED_SERVICE}-service:${RC_TAG}
+          sudo docker push $AWS_ECR_URL/${UPDATED_SERVICE}-service:${RC_TAG}
 
-      - name: Set Image tag name
+      - name: Set Image tag name for promoted
         run: |
           # replace dots with hyphens once
           SANITIZED_RC_TAG=${RC_TAG//./-}
+          
+          echo "${svc}_TAG=${RC_TAG}" >> $GITHUB_ENV
+          echo "${svc}_SERV=${SANITIZED_RC_TAG}" >> $GITHUB_ENV
           
           for svc in FRONTEND CATALOG CUSTOMER ORDER; do
             # e.g. FRONTEND_TAG=v1.2.0-rc-20250425

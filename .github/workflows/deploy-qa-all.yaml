@@ -10,7 +10,7 @@ on:
     types: [deploy-qa-all]
 
 jobs:
-  deploy-qa:
+  deploy-qa-all:
     runs-on: ubuntu-latest
 
     env:

@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/customer-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/customer-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/ingress-uat-green.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/ingress-uat-green.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/k8s/order-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/order-deployment.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.github/workflows/blue-green-uat.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy-qa-all.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy-qa-all.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/promote-uat.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qa/terraform/backend.tf" beforeDir="false" afterPath="$PROJECT_DIR$/qa/terraform/backend.tf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,22 +35,22 @@
     <option name="showLibraryContents" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "Terraform.terraform get in terraform.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/claudio/Desktop/School/USF_CS/686_DevOps/Final-project/microservice-infra/k8s",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;Terraform.terraform get in terraform.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/claudio/Desktop/School/USF_CS/686_DevOps/Final-project/microservice-infra/k8s&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/k8s" />
@@ -87,31 +86,8 @@
       <workItem from="1745878290891" duration="4976000" />
       <workItem from="1745887227622" duration="976000" />
       <workItem from="1745888311809" duration="514000" />
-      <workItem from="1745888837229" duration="8956000" />
-    </task>
-    <task id="LOCAL-00032" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745557532389</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1745557532390</updated>
-    </task>
-    <task id="LOCAL-00033" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745557858139</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1745557858139</updated>
-    </task>
-    <task id="LOCAL-00034" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745558669147</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1745558669147</updated>
+      <workItem from="1745888837229" duration="12068000" />
+      <workItem from="1745983824663" duration="2723000" />
     </task>
     <task id="LOCAL-00035" summary="Added workflow">
       <option name="closed" value="true" />
@@ -481,7 +457,31 @@
       <option name="project" value="LOCAL" />
       <updated>1745898127948</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745899856417</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1745899856417</updated>
+    </task>
+    <task id="LOCAL-00082" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745900030907</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1745900030907</updated>
+    </task>
+    <task id="LOCAL-00083" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1745900392660</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1745900392660</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
