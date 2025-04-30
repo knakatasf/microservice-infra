@@ -92,7 +92,7 @@ jobs:
 
             short=${svc%-service}              # e.g. "frontend"
             UPPER=${short^^}                   # e.g. "FRONTEND"
-            VAR_NAME = ${UPPER}_SERV           # e.g. "FRONTEND_SERV"
+            VAR_NAME=${UPPER}_SERV             # e.g. "FRONTEND_SERV"
 
             if [ "$short" = "$UPDATED" ]; then
               # use the sanitized GA tag you already wrote to GITHUB_ENV
