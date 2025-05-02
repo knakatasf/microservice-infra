@@ -36,27 +36,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token:     ${{ secrets.AWS_SESSION_TOKEN }}
 
-#      - name: Promote to rc tag
-#        run: |
-#          aws ecr get-login-password --region us-east-1 \
-#              | docker login --username AWS --password-stdin $AWS_ECR_URL
-#
-#          # Inputs
-#          SHORT="${{ github.event.inputs.updated_service }}"   # e.g. "frontend"
-#          SERVICE="${SHORT}-service"                           # e.g. "frontend-service"
-#          QA_TAG="${{ github.event.inputs.qa_tag }}"           # e.g. "1.2.0-qa-20250501"
-#
-#          # Build RC tag
-#          PREFIX=${QA_TAG%-qa-*}                               # "1.2.0"
-#          TODAY=$(date +%Y%m%d)                                # e.g. "20250502"
-#          RC_TAG="${PREFIX}-rc-${TODAY}"                       # "1.2.0-rc-20250502"
-#          echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
-#
-#          echo "Promoting only $SERVICE: $QA_TAG → $RC_TAG"
-#          docker pull $AWS_ECR_URL/$SERVICE:$QA_TAG
-#          docker tag  $AWS_ECR_URL/$SERVICE:$QA_TAG \
-#                      $AWS_ECR_URL/$SERVICE:$RC_TAG
-#          docker push $AWS_ECR_URL/$SERVICE:$RC_TAG
+      - name: Promote to rc tag
+        run: |
+          aws ecr get-login-password --region us-east-1 \
+              | docker login --username AWS --password-stdin $AWS_ECR_URL
+
+          # Inputs
+          SHORT="${{ github.event.inputs.updated_service }}"   # e.g. "frontend"
+          SERVICE="${SHORT}-service"                           # e.g. "frontend-service"
+          QA_TAG="${{ github.event.inputs.qa_tag }}"           # e.g. "1.2.0-qa-20250501"
+
+          # Build RC tag
+          PREFIX=${QA_TAG%-qa-*}                               # "1.2.0"
+          TODAY=$(date +%Y%m%d)                                # e.g. "20250502"
+          RC_TAG="${PREFIX}-rc-${TODAY}"                       # "1.2.0-rc-20250502"
+          echo "RC_TAG=$RC_TAG" >> $GITHUB_ENV
+
+          echo "Promoting only $SERVICE: $QA_TAG → $RC_TAG"
+          docker pull $AWS_ECR_URL/$SERVICE:$QA_TAG
+          docker tag  $AWS_ECR_URL/$SERVICE:$QA_TAG \
+                      $AWS_ECR_URL/$SERVICE:$RC_TAG
+          docker push $AWS_ECR_URL/$SERVICE:$RC_TAG
 
       - name: Set image tags for UAT deploy
         run: |
