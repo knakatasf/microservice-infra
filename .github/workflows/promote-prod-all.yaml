@@ -14,7 +14,7 @@ jobs:
       AWS_ECR_URL: ${{ secrets.AWS_ECR_URL }}
       EKS_CLUSTER: eks-microservice
       HOSTED_ZONE_NAME: claudio.works
-      GA_TAG: latest
+      GA_TAG: v1.0.0-ga
 
     steps:
       - name: Check out repo
