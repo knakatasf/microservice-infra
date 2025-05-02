@@ -3,14 +3,16 @@ kind: Deployment
 metadata:
   name: customer-deployment-${CUSTOMER_SERV}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: customer
+      version: ${CUSTOMER_SERV}
   template:
     metadata:
       labels:
         app: customer
+        version: ${CUSTOMER_SERV}
     spec:
       containers:
         - name: customer
@@ -25,6 +27,7 @@ metadata:
 spec:
   selector:
     app: customer
+    version: ${CUSTOMER_SERV}
   ports:
     - protocol: TCP
       port: 8080

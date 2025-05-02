@@ -3,14 +3,16 @@ kind: Deployment
 metadata:
   name: order-deployment-${ORDER_SERV}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: order
+      version: ${ORDER_SERV}
   template:
     metadata:
       labels:
         app: order
+        version: ${ORDER_SERV}
     spec:
       containers:
         - name: order
@@ -34,6 +36,7 @@ metadata:
 spec:
   selector:
     app: order
+    version: ${ORDER_SERV}
   ports:
     - protocol: TCP
       port: 8080

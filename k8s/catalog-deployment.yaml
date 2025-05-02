@@ -3,14 +3,16 @@ kind: Deployment
 metadata:
   name: catalog-deployment-${CATALOG_SERV}
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: catalog
+      version: ${CATALOG_SERV}
   template:
     metadata:
       labels:
         app: catalog
+        version: ${CATALOG_SERV}
     spec:
       containers:
         - name: catalog
@@ -25,6 +27,7 @@ metadata:
 spec:
   selector:
     app: catalog
+    version: ${CATALOG_SERV}
   ports:
     - protocol: TCP
       port: 8080
