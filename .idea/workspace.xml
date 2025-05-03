@@ -4,12 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="">
+    <list default="true" id="e95c9528-74a5-4b09-8491-1fde7c748447" name="Changes" comment="Added workflow">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/catalog-deployment.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/customer-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/customer-deployment.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/frontend-deployment.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/k8s/order-deployment.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/k8s/order-deployment.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/qa/docker-compose.default.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/qa/packer/packer-ami.pkr.hcl" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/qa/terraform/backend.tf" beforeDir="false" afterPath="$PROJECT_DIR$/qa/terraform/backend.tf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,15 +91,8 @@
       <workItem from="1745888311809" duration="514000" />
       <workItem from="1745888837229" duration="12068000" />
       <workItem from="1745983824663" duration="21661000" />
-      <workItem from="1746156608826" duration="7232000" />
-    </task>
-    <task id="LOCAL-00057" summary="Added workflow">
-      <option name="closed" value="true" />
-      <created>1745618491823</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1745618491823</updated>
+      <workItem from="1746156608826" duration="8123000" />
+      <workItem from="1746217212832" duration="6312000" />
     </task>
     <task id="LOCAL-00058" summary="Added workflow">
       <option name="closed" value="true" />
@@ -482,7 +478,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746157062675</updated>
     </task>
-    <option name="localTasksCounter" value="106" />
+    <task id="LOCAL-00106" summary="Added workflow">
+      <option name="closed" value="true" />
+      <created>1746203557275</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1746203557275</updated>
+    </task>
+    <option name="localTasksCounter" value="107" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
